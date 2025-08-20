@@ -1,0 +1,14 @@
+:root {
+  --main-background-color: #fafafa;
+  --paragraph-text-color: #333;
+  --main-border-color: #ccc;
+}
+
+html,
+body {
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: small;
+  margin: 0;
+  padding: 0;
+  background: var(--main-background-color);
+}

@@ -1,0 +1,118 @@
+.seekbar-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+}
+
+/* SEEKBAR STYLES */
+.video-controls-inputs.seekbar {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 5px;
+  cursor: pointer;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+.video-controls-inputs.seekbar::-webkit-slider-runnable-track {
+  height: 5px;
+  background: transparent;
+  border-radius: 6px;
+}
+
+.video-controls-inputs.seekbar::-moz-range-track {
+  height: 5px;
+  background: transparent;
+  border-radius: 6px;
+}
+
+/* BUFFER PROGRESS STYLES */
+.buffered-progress {
+  position: absolute;
+  height: 5px;
+  width: auto;
+  left: 17px;
+  right: 17px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 6px;
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.buffered-progress::-webkit-progress-bar {
+  height: 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.buffered-progress::-webkit-progress-value {
+  background-color: rgba(210, 210, 210, 0.8);
+  border-radius: 6px;
+}
+
+.buffered-progress::-moz-progress-bar {
+  background-color: rgba(210, 210, 210, 0.8);
+  border-radius: 6px;
+}
+
+.buffered-progress.buffering {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(210,210,210,0.6) 0,
+    rgba(210,210,210,0.6) 10px,
+    rgba(180,180,180,0.6) 10px,
+    rgba(180,180,180,0.6) 20px
+  );
+  animation: zebraMove 1s linear infinite;
+  will-change: background-position;
+  border-radius: 6px;
+  
+}
+
+@keyframes zebraMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 60px 0;
+  }
+}
+
+/* THUMB STYLES */
+.video-controls-inputs.seekbar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fafafa;
+  cursor: pointer;
+  margin-top: -4.5px; /* center thumb */
+  transition: box-shadow 0.2s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.video-controls-inputs.seekbar:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.video-controls-inputs.seekbar::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fafafa;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+  border: none;
+}
+
+.video-controls-inputs.seekbar:active::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}

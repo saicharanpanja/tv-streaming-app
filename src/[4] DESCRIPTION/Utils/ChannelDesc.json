@@ -1,0 +1,142 @@
+{
+  "ard-alpha": {
+    "name": "Ard alpha Channel",
+    "id": "ard-alpha",
+    "src": [
+      "/channel-thumbnails/ard-alpha.jpg",
+      "https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8"
+    ],
+    "desc": "German free-to-air television channel run by regional public-service broadcaster Bayerischer Rundfunk. Its programming includes shows produced by Bayerischer Rundfunk, as well as content from ARD and the Austrian broadcaster ORF. ARD-alpha offers a wide range of educational programmes covering science, religion, music, philosophy, literature, language learning, art, and culture.",
+    "area": "Germany",
+    "owner": "Bayerischer Rundfunk",
+    "launch": "7 January 1998",
+    "web": "www.ard-alpha.de",
+    "color": "#db502b"
+  },
+  "hr": {
+    "name": "HR Fernsehen",
+    "id": "hr",
+    "src": [
+      "/channel-thumbnails/hr.jpg",
+      "https://hr-live.ard-mcdn.de/hr/live/hls/de/master.m3u8"
+    ],
+    "desc": "Regional television channel of Hessischer Rundfunk for the state of Hesse, Germany. The channel focuses on regional reporting and is best known for its popular Sunday hessenQuiz, hosted by Jörg Bombach. It also features a variety of ranking programmes showcasing Hesse’s most beautiful rivers, castles, and mountains, as well as its most celebrated public figures.",
+    "area": "Germany · Austria · Switzerland · Liechtenstein · Luxembourg · Netherlands · Belgium",
+    "owner": "Hessischer Rundfunk",
+    "launch": "5 October 1964",
+    "web": "www.hr-fernsehen.de",
+    "color": "#610439"
+  },
+  "kika": {
+    "name": "KiKA Channel",
+    "id": "kika",
+    "src": [
+      "/channel-thumbnails/kika.jpg",
+      "https://kika-live.ard-mcdn.de/kika/live/hls/de/master.m3u8"
+    ],
+    "desc": "German free-to-air television channel based in Erfurt, Germany. Its intended audience is children and young viewers, and it is free of advertising. The channel is primarily watched by children aged 3 to 13. KiKA airs at least two movies each week on Fridays and Sundays, often favouring animated films over live-action productions.",
+    "area": "Germany · Austria · Switzerland · Liechtenstein · Belgium · Luxembourg",
+    "owner": "ARD and ZDF",
+    "launch": "1 January 1997",
+    "web": "www.kika.de",
+    "color": "#015b63"
+  },
+  "tagesschau24": {
+    "name": "Tagesschau24 Channel",
+    "id": "tagesschau24",
+    "src": [
+      "/channel-thumbnails/tagesschau24.jpg",
+      "https://tagesschau-live.ard-mcdn.de/tagesschau/live/hls/de/master.m3u8"
+    ],
+    "desc": "German free-to-air television channel owned by ARD and managed by Norddeutscher Rundfunk. It serves as ARD’s dedicated news channel, competing with Welt and n-tv. In addition to news coverage, Tagesschau24 also features programmes on culture, sports, and science.",
+    "area": "Germany",
+    "owner": "ARD",
+    "launch": "30 August 1997",
+    "web": "www.tagesschau24.de",
+    "color": "#013671"
+  },
+  "mdr": {
+    "name": "MDR Fernsehen",
+    "id": "mdr",
+    "src": [
+      "/channel-thumbnails/mdr.jpg",
+      "https://mdr-live.ard-mcdn.de/mdr/live/hls/de/master.m3u8"
+    ],
+    "desc": "Regional public service television channel operated by Mitteldeutscher Rundfunk (MDR), serving the German states of Saxony, Saxony-Anhalt, and Thuringia. It is one of the seven regional “third programmes” broadcast within the federal ARD network.",
+    "area": "Germany · Austria · Switzerland · Liechtenstein · Luxembourg",
+    "owner": "Mitteldeutscher Rundfunk (MDR)",
+    "launch": "1 January 1992",
+    "web": "www.mdr.de/tv",
+    "color": "#0063af"
+  },
+  "one": {
+    "name": "One Channel",
+    "id": "one",
+    "src": [
+      "/channel-thumbnails/one.jpg",
+      "https://mcdn-one.ard.de/ardone/hls/master.m3u8"
+    ],
+    "desc": "German free-to-air television channel owned by ARD and managed by Westdeutscher Rundfunk (WDR). One focuses on entertainment, primarily airing repeats from other ARD channels, including films, dramas, documentaries, reports, magazines, and music programmes.",
+    "area": "Germany",
+    "owner": "ARD",
+    "launch": "30 August 1997",
+    "web": "www.one.ard.de",
+    "color": "#4c0254"
+  },
+  "zdf": {
+    "name": "ZDF Channel",
+    "id": "zdf",
+    "src": [
+      "/channel-thumbnails/zdf.jpg",
+      "https://zdf-hls-15.akamaized.net/hls/live/2016498/de/high/master.m3u8"
+    ],
+    "desc": "ZDF (short for Zweites Deutsches Fernsehen) is a German public-service television broadcaster based in Mainz, Rhineland-Palatinate. Its programming spans news, documentaries, entertainment shows, dramas, films, sports, and cultural events.",
+    "area": "Germany",
+    "owner": "-",
+    "launch": "1 April 1963",
+    "web": "www.zdf.de",
+    "color": "#fa7d19"
+  },
+  "br": {
+    "name": "BR Fernsehen",
+    "id": "br",
+    "src": [
+      "/channel-thumbnails/br.jpg",
+      "https://mcdn.br.de/br/fs/bfs_sued/hls/de/master.m3u8"
+    ],
+    "desc": "Regional public-service television channel owned and operated by Bayerischer Rundfunk (BR), serving the state of Bavaria. As part of the ARD network, BR Fernsehen offers a wide range of programming including regional news, cultural features, entertainment, documentaries, and sports, with a strong focus on Bavarian identity and traditions.",
+    "area": "Worldwide",
+    "owner": "Bayerischer Rundfunk",
+    "launch": "30 March 1924",
+    "web": "www.br.de",
+    "color": "#0069ff"
+  },
+  "phoenix": {
+    "name": "Phoenix Channel",
+    "id": "phoenix",
+    "src": [
+      "/channel-thumbnails/phoenix.jpg",
+      "https://zdf-hls-19.akamaized.net/hls/live/2016502/de/high/master.m3u8"
+    ],
+    "desc": "German public-service television channel jointly operated by ARD and ZDF, focusing on news, documentaries, and political coverage. Phoenix provides in-depth reporting on national and international affairs, including live broadcasts of government sessions, press conferences, and current events, with an emphasis on analysis and informative programming.",
+    "area": "Germany · Austria · Switzerland",
+    "owner": "ARD and ZDF",
+    "launch": "7 April 1997",
+    "web": "www.phoenix.de",
+    "color": "#00687c"
+  },
+  "arte": {
+    "name": "Arte Channel",
+    "id": "arte",
+    "src": [
+      "/channel-thumbnails/arte.jpg",
+      "https://arteliveext.akamaized.net/hls/live/2030993/artelive_de/index.m3u8"
+    ],
+    "desc": "European public-service television channel jointly operated by France and Germany, focusing on culture, arts, and documentaries. Arte broadcasts a wide range of programming including films, series, music, theater, and cultural reports, often highlighting European perspectives and promoting international cooperation in the arts.",
+    "area": "Germany · France · Belgium · Netherlands · Luxembourg · Monaco · Austria · Tunisia · Switzerland · Portugal",
+    "owner": "ARTE France and ARTE Deutschland TV GmbH",
+    "launch": "30 May 1992",
+    "web": "www.arte.tv",
+    "color": "#fa481c"
+  }
+}

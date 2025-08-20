@@ -1,0 +1,66 @@
+/*MOBILE DEVICES*/
+@media screen and (max-width: 750px) {
+  .nav-container {
+    left: 0;
+    bottom: 0;
+    right: 0;
+    min-width: 280px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-icon-wrapper {
+    flex-grow: 1;
+    height: 55px;
+  }
+}
+
+/*DESKTOPS*/
+@media screen and (min-width: 751px) {
+  .nav-container {
+    top: 54px;
+    left: 0;
+    bottom: 0;
+    width: 65px;
+    flex-direction: column;
+    padding-top: 5px;
+  }
+
+  .nav-icon-wrapper {
+    height: 70px;
+    width: 55px;
+  }
+}
+
+.nav-container {
+  position: fixed;
+  display: flex;
+  background: #fafafa;
+  align-items: center;
+  z-index: 5;
+}
+
+.nav-icon-wrapper {
+  user-select: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.nav-icon-wrapper:hover {
+  background: #f2f2f2;
+}
+
+.nav-icon {
+  user-select: none;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.nav-icon.clicked {
+  transform: scale(0.8);
+}
