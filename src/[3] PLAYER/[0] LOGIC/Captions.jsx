@@ -2,15 +2,16 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-const languageMap = {
+const captionsLangLabel = {
   en: 'English',
   eng: 'English',
   de: 'Deutsch',
   deu: 'Deutsch',
+  ger: 'Deutsch',
 };
 
 const getConsistentLabel = (track) => {
-  return languageMap[track.language] || track.label;
+  return captionsLangLabel[track.language] || track.label;
 };
 
 export default function Captions({ videoRef, captionsLabel, setCaptionsLabel, tracks }) {

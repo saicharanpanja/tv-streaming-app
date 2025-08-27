@@ -1,14 +1,24 @@
 import { CaretLeftIcon } from '@phosphor-icons/react';
 
-const languageMap = {
+const captionsLangLabel = {
   en: 'English',
   eng: 'English',
   de: 'Deutsch',
   deu: 'Deutsch',
+  ger: 'Deutsch',
 };
 
+const captionsLangTag = {
+  en: 'EN',
+  eng: 'EN',
+  de: 'DE',
+  deu: 'DE',
+  ger: 'DE',
+};
+
+
 function getConsistentLabel(track) {
-  return languageMap[track.language] || track.label;
+  return captionsLangLabel[track.language] || track.label;
 };
 
 export default function CaptionsMenu({
@@ -69,7 +79,7 @@ export default function CaptionsMenu({
             <span>{consistentLabel}</span>
             <span
               className={`settings-menu captions-item-label`}
-            >{track.language.toUpperCase().slice(0, 2) || ""}</span>
+            >{captionsLangTag[track.language] || track.language.toUpperCase().slice(0, 2) || ""}</span>
           </div>
         );
       })}

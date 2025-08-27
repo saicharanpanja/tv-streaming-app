@@ -138,5 +138,117 @@
     "launch": "30 May 1992",
     "web": "www.arte.tv",
     "color": "#fa481c"
+  },
+  "das-erste": {
+    "name": "Das Erste",
+    "id": "das-erste",
+    "src": [
+      "/channel-thumbnails/das-erste.jpg",
+      "https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
+    ],
+    "desc": "Flagship public-service television channel of ARD, serving audiences across Germany. Das Erste offers a broad range of programming including news, entertainment, films, series, documentaries, and cultural shows, with a focus on national coverage and public-service broadcasting standards.",
+    "area": "Germany",
+    "owner": "ARD",
+    "launch": "25 December 1952",
+    "web": "www.daserste.de",
+    "color": "#001a4b"
+  },
+  "ndr": {
+    "name": "NDR Fernsehen",
+    "id": "ndr",
+    "src": [
+      "/channel-thumbnails/ndr.jpg",
+      "https://ndrint.akamaized.net/hls/live/2020766/ndr_int/index.m3u8"
+    ],
+    "desc": "Regional public-service television channel of Norddeutscher Rundfunk (NDR), serving the northern German states of Lower Saxony, Mecklenburg-Vorpommern, Schleswig-Holstein, and Hamburg. As part of the ARD network, NDR Fernsehen features regional news, cultural programmes, documentaries, entertainment, and sports, with a strong focus on northern German life and identity.",
+    "area": "Worldwide",
+    "owner": "NDR and RB",
+    "launch": "4 January 1965",
+    "web": "www.ndrfernsehen.de",
+    "color": "#173e7d"
+  },
+  "rbb": {
+    "name": "RBB Fernsehen",
+    "id": "rbb",
+    "src": [
+      "/channel-thumbnails/rbb.jpg",
+      "https://rbb-live.ard-mcdn.de/rbb/berlin/hls/de/master.m3u8"
+    ],
+    "desc": "Regional public-service television channel of Rundfunk Berlin-Brandenburg (rbb), serving the German capital Berlin and the state of Brandenburg. As part of the ARD network, rbb Fernsehen broadcasts regional news, cultural programmes, documentaries, entertainment, and sports, with a focus on the life and identity of Berlin and Brandenburg.",
+    "area": "Germany",
+    "owner": "Rundfunk Berlin-Brandenburg (RBB)",
+    "launch": "29 February 2004",
+    "web": 	"www.rbbfernsehen.de",
+    "color": "#e31818"
+  },
+  "swr": {
+    "name": "SWR Fernsehen",
+    "id": "swr",
+    "src": [
+      "/channel-thumbnails/swr.jpg",
+      "https://mcdn.swr.de/swr/swrbwd/master.m3u8"
+    ],
+    "desc": "Regional public-service television channel of Südwestrundfunk (SWR), serving the states of Baden-Württemberg and Rhineland-Palatinate. As part of the ARD network, SWR Fernsehen features regional news, cultural programmes, documentaries, entertainment, and sports, with a strong emphasis on the life and traditions of southwestern Germany.",
+    "area": "Germany · Austria · Switzerland · Liechtenstein · Luxembourg · Netherlands · Belgium · France",
+    "owner": "Südwestrundfunk (SWR)",
+    "launch": "5 April 1969",
+    "web": 	"www.swrfernsehen.de",
+    "color": "#1D0B40"
+  },
+  "wdr": {
+    "name": "WDR Fernsehen",
+    "id": "wdr",
+    "src": [
+      "/channel-thumbnails/wdr.jpg",
+      "https://wdr-live.ard-mcdn.de/wdr/live/hls/de/master.m3u8"
+    ],
+    "desc": "Regional public-service television channel of Westdeutscher Rundfunk (WDR), serving the state of North Rhine-Westphalia. As part of the ARD network, WDR Fernsehen broadcasts regional news, cultural programmes, documentaries, entertainment, and sports, with a strong focus on the life and diversity of Germany’s most populous state.",
+    "area": "Germany",
+    "owner": "Westdeutscher Rundfunk (WDR)",
+    "launch": "17 December 1965",
+    "web": 	"www.wdr.de",
+    "color": "#18365b"
+  },
+  "3sat": {
+    "name": "3sat Channel",
+    "id": "3sat",
+    "src": [
+      "/channel-thumbnails/3sat.jpg",
+      "https://zdf-hls-18.akamaized.net/hls/live/2016501/dach/high/master.m3u8"
+    ],
+    "desc": "Public-service television channel operated collaboratively by public broadcasters from Germany (ZDF, ARD), Austria (ORF) and Switzerland (SRG SSR). 3sat focuses on culture, arts, science, and documentaries, offering a broad range of programming including films, theater, music, literature, and discussions, with a strong emphasis on German-speaking cultural exchange.",
+    "area": "Germany · Austria · Switzerland · Liechtenstein",
+    "owner": "-",
+    "launch": "1 December 1984",
+    "web": 	"www.3sat.de",
+    "color": "#000000"
+  },
+  "zdf-neo": {
+    "name": "ZDFneo Channel",
+    "id": "zdf-neo",
+    "src": [
+      "/channel-thumbnails/zdf-neo.jpg",
+      "https://zdf-hls-16.akamaized.net/hls/live/2016499/de/high/master.m3u8"
+    ],
+    "desc": "German free-to-air television channel of ZDF, targeting young adult audiences. ZDFneo primarily broadcasts entertainment programmes, including series, films, documentaries, and comedy, with a focus on contemporary themes and innovative content tailored for viewers aged roughly 25–49.",
+    "area": "Germany",
+    "owner": "ZDF",
+    "launch": "1 November 2009",
+    "web": 	"www.zdfneo.de",
+    "color": "#d0245e"
+  },
+  "zdf-info": {
+    "name": "ZDFinfo Channel",
+    "id": "zdf-info",
+    "src": [
+      "/channel-thumbnails/zdf-info.jpg",
+      "https://zdf-hls-17.akamaized.net/hls/live/2016500/de/high/master.m3u8"
+    ],
+    "desc": "German free-to-air television channel of ZDF, focusing on documentaries, news analysis, and factual programming. ZDFinfo covers national and international current events, history, science, society, and investigative reports, providing in-depth information and educational content for a wide audience.",
+    "area": "Germany",
+    "owner": "ZDF",
+    "launch": "27 August 1997",
+    "web": 	"www.zdfinfo.de",
+    "color": "#39434b"
   }
 }
