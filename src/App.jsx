@@ -10,9 +10,10 @@ function App() {
       <Routes>
         <Route index element={<TvPage />} />
         <Route path="/tv" element={<TvPage />} />
+        <Route path="/tv/:channelKey" element={<TvPage />} />
       </Routes>
     </>
-  )
+  );
 }
 
 export default App

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Hls from "hls.js";
 
 import Seekbar from "./Seekbar";
@@ -15,33 +16,34 @@ import "../[1] STYLES/Volume.css";
 import "../[1] STYLES/Settings.css";
 import "../[1] STYLES/Fullscreen.css";
 
-function Player({
-  poster = "",
-  src = "https://devstreaming-cdn.apple.com/videos/streaming/examples/adv_dv_atmos/main.m3u8"
-}) {
+function Player({ poster = "", src = "" }) {
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const containerRef = useRef(null);
+  const location = useLocation();
 
+  const [isReadyToPlay, setIsReadyToPlay] = useState(false);
+
+  // States for player UI
   const [captionsLabel, setCaptionsLabel] = useState('Disabled');
   const [tracks, setTracks] = useState([]);
-
   const [qualities, setQualities] = useState([]);
   const [selected, setSelected] = useState("Auto");
   const [autoHeight, setAutoHeight] = useState(null);
 
+  // --- EFFECT 1: Manages HLS Stream Setup & Teardown ---
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !src) return;
+
+    setIsReadyToPlay(false);
 
     function applyTracks() {
       const availableTracks = Array.from(video.textTracks).filter(
         (t) =>
           t.cues != null &&
-          t.activeCues != null &&
           (t.kind === "subtitles" || t.kind === "captions")
       );
-
       setTracks(availableTracks);
     }
 
@@ -72,19 +74,22 @@ function Player({
         if (level?.height) setAutoHeight(level.height);
       });
 
+      hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+        setIsReadyToPlay(true);
+      });
+
       hls.loadSource(src);
       hls.attachMedia(video);
-      video.play().catch(error => console.error("Autoplay was prevented:", error));
       video.addEventListener('loadedmetadata', applyTracks);
+
       return () => {
-        if (hls) hls.destroy();
+        hls.destroy();
         hlsRef.current = null;
         video.removeEventListener('loadedmetadata', applyTracks);
-      }
-
+      };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
-      video.play().catch(error => console.error("Autoplay was prevented:", error));
+      setIsReadyToPlay(true);
       video.addEventListener('loadedmetadata', applyTracks);
       return () => {
         video.removeEventListener('loadedmetadata', applyTracks);
@@ -92,6 +97,18 @@ function Player({
     }
   }, [src]);
 
+  // --- EFFECT 2: Manages Conditional Autoplay ---
+  useEffect(() => {
+    const video = videoRef.current;
+    const shouldAutoplay = location.state?.fromThumbnail;
+
+    if (video && isReadyToPlay && shouldAutoplay) {
+      video.play().catch((error) => {
+        console.error('Autoplay was attempted but prevented:', error);
+      });
+    }
+  }, [isReadyToPlay, location.state]);
+  
   return (
     <div className="player-container" ref={containerRef}>
       <IconSprite />
