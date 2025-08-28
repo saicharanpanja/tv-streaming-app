@@ -8,7 +8,7 @@ import {
 } from "@phosphor-icons/react";
 import "./NavigationBar.css";
 
-function NavigationBar() {
+function NavigationBar({channel}) {
   const [clickedIcon, setClickedIcon] = useState(null);
 
   function navClickEffect(page) {
@@ -20,7 +20,7 @@ function NavigationBar() {
     <div className="nav-container">
 
       <NavLink
-        to="/tv"
+        to={`/tv${channel ? `/${channel}` : ""}`}
         className="nav-icon-wrapper"
         onClick={() => navClickEffect("tv")}
       >

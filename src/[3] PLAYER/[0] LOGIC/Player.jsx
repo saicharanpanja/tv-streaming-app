@@ -22,8 +22,6 @@ function Player({ poster = "", src = "" }) {
   const containerRef = useRef(null);
   const location = useLocation();
 
-  const [isReadyToPlay, setIsReadyToPlay] = useState(false);
-
   // States for player UI
   const [captionsLabel, setCaptionsLabel] = useState('Disabled');
   const [tracks, setTracks] = useState([]);
@@ -31,12 +29,11 @@ function Player({ poster = "", src = "" }) {
   const [selected, setSelected] = useState("Auto");
   const [autoHeight, setAutoHeight] = useState(null);
 
-  // --- EFFECT 1: Manages HLS Stream Setup & Teardown ---
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
-
-    setIsReadyToPlay(false);
+    
+    const shouldAutoplay = location.state?.fromThumbnail;
 
     function applyTracks() {
       const availableTracks = Array.from(video.textTracks).filter(
@@ -74,12 +71,9 @@ function Player({ poster = "", src = "" }) {
         if (level?.height) setAutoHeight(level.height);
       });
 
-      hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-        setIsReadyToPlay(true);
-      });
-
       hls.loadSource(src);
       hls.attachMedia(video);
+      shouldAutoplay && video.play().catch(()=> {});
       video.addEventListener('loadedmetadata', applyTracks);
 
       return () => {
@@ -89,26 +83,14 @@ function Player({ poster = "", src = "" }) {
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
-      setIsReadyToPlay(true);
+      shouldAutoplay && video.play().catch(()=> {});
       video.addEventListener('loadedmetadata', applyTracks);
       return () => {
         video.removeEventListener('loadedmetadata', applyTracks);
       }
     }
-  }, [src]);
+  }, [src, location.state]);
 
-  // --- EFFECT 2: Manages Conditional Autoplay ---
-  useEffect(() => {
-    const video = videoRef.current;
-    const shouldAutoplay = location.state?.fromThumbnail;
-
-    if (video && isReadyToPlay && shouldAutoplay) {
-      video.play().catch((error) => {
-        console.error('Autoplay was attempted but prevented:', error);
-      });
-    }
-  }, [isReadyToPlay, location.state]);
-  
   return (
     <div className="player-container" ref={containerRef}>
       <IconSprite />

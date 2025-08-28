@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 
 import Header from '../[1] HEADER/Header'
@@ -10,25 +9,13 @@ import json from '../[4] DESCRIPTION/Utils/ChannelDesc.json'
 import './TvPage.css'
 
 function TvPage() {
-  const [isPlaying, setIsPlaying] = useState(null);
   const { channelKey } = useParams();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [channelKey]);
-
-  useEffect(() => {
-    if (channelKey && json[channelKey]) {
-      setIsPlaying(channelKey);
-    } else {
-      setIsPlaying(null);
-    }
-  }, [channelKey]);
+  const isPlaying = channelKey && json[channelKey] ? channelKey : null;
 
   return (
     <div className="tv-container">
       <Header color={isPlaying ? `${json[isPlaying].color}` : '#03581d'} />
-      <NavigationBar />
+      <NavigationBar channel={isPlaying}/>
 
       {isPlaying && (
         <>
