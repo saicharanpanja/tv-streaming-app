@@ -90,21 +90,20 @@ export default function Volume({ videoRef }) {
 
   return (
     <div className="video-controls volume-container">
-      <Icon
-        name="volume-off"
-        onClick={toggleMute}
-        className={`video-controls-icons volume-off${volume === 0 || isMuted ? "" : " hide"}`}
-      />
-      <Icon
-        name="volume-up"
-        onClick={toggleMute}
-        className={`video-controls-icons volume-up${volume >= 0.5 && volume <= 1 && !isMuted ? "" : " hide"}`}
-      />
-      <Icon
-        name="volume-down"
-        onClick={toggleMute}
-        className={`video-controls-icons volume-down${volume > 0 && volume < 0.5 && !isMuted ? "" : " hide"}`}
-      />
+      <button className="video-controls volume-button-container" onClick={toggleMute}>
+        <Icon
+          name="volume-off"
+          className={`video-controls-icons volume-off${volume === 0 || isMuted ? "" : " hide"}`}
+        />
+        <Icon
+          name="volume-up"
+          className={`video-controls-icons volume-up${volume >= 0.5 && volume <= 1 && !isMuted ? "" : " hide"}`}
+        />
+        <Icon
+          name="volume-down"
+          className={`video-controls-icons volume-down${volume > 0 && volume < 0.5 && !isMuted ? "" : " hide"}`}
+        />
+      </button>
       <input
         type="range"
         min="0"

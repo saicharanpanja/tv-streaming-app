@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Icon from "../[2] UTILS/Icon";
 
 export default function Fullscreen({ containerRef }) {
@@ -14,40 +14,44 @@ export default function Fullscreen({ containerRef }) {
     };
   }, []);
 
-  function toggleFullscreen() {
+  const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
-      } else if (containerRef.current.mozRequestFullScreen) { /* Firefox */
-        containerRef.current.mozRequestFullScreen();
-      } else if (containerRef.current.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+      } else if (containerRef.current.webkitRequestFullscreen) { // Safari
         containerRef.current.webkitRequestFullscreen();
-      } else if (containerRef.current.msRequestFullscreen) { /* IE/Edge */
+      } else if (containerRef.current.msRequestFullscreen) { // IE11
         containerRef.current.msRequestFullscreen();
       }
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) {
+      } else if (document.webkitExitFullscreen) { // Safari
         document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
+      } else if (document.msExitFullscreen) { // IE11
         document.msExitFullscreen();
       }
     }
-  }
+  }, [containerRef]);
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const { tagName } = event.target;
+      if (tagName === "INPUT" || tagName === "TEXTAREA") return;
+      if (event.code === "KeyF") toggleFullscreen();
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [toggleFullscreen]);
 
   return (
-    <div className="video-controls fullscreen-container" onClick={toggleFullscreen}>
+    <button className="video-controls fullscreen-container" onClick={toggleFullscreen}>
       <Icon
-        name="enter-fullscreen"
-        className={`video-controls-icons enter-fullscreen${isFullscreen ? " hide" : ""}`}
+        name={isFullscreen ? "exit-fullscreen" : "enter-fullscreen"}
+        className="video-controls-icons"
       />
-      <Icon name="exit-fullscreen"
-        className={`video-controls-icons exit-fullscreen${!isFullscreen ? " hide" : ""}`}
-      />
-
-    </div>
+    </button>
   );
 }
