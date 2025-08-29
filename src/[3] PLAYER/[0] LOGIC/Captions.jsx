@@ -1,69 +1,27 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-const captionsLangLabel = {
-  en: 'English',
-  eng: 'English',
-  de: 'Deutsch',
-  deu: 'Deutsch',
-  ger: 'Deutsch',
-};
-
-const getConsistentLabel = (track) => {
-  return captionsLangLabel[track.language] || track.label;
-};
-
-export default function Captions({ videoRef, captionsLabel, setCaptionsLabel, tracks }) {
+export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
   const [overlayData, setOverlayData] = useState(null);
   const areCaptionsOn = captionsLabel !== 'Disabled';
-  const lastSelectedTrackLabelRef = useRef(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    function findInitialTrack() {
-      const textTracks = video.textTracks;
-      for (let i = 0; i < textTracks.length; i++) {
-        if (textTracks[i].mode === 'showing') {
-          const label = getConsistentLabel(textTracks[i]);
-          setCaptionsLabel(label);
-          lastSelectedTrackLabelRef.current = label;
-          return;
-        }
-      }
-      setCaptionsLabel('Disabled');
-    }
-
-    video.addEventListener("loadeddata", findInitialTrack);
-    return () => {
-      video.removeEventListener("loadeddata", findInitialTrack);
-    };
-  }, [setCaptionsLabel, videoRef]);
 
   const toggleCaptions = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !tracks || tracks.length === 0) return;
+    if (tracks.length === 0) return;
 
     if (areCaptionsOn) {
-      lastSelectedTrackLabelRef.current = captionsLabel;
-      tracks.forEach(track => track.mode = 'disabled');
       setCaptionsLabel('Disabled');
     } else {
-      const targetLabel = lastSelectedTrackLabelRef.current && lastSelectedTrackLabelRef.current !== 'Disabled'
-        ? lastSelectedTrackLabelRef.current
-        : getConsistentLabel(tracks[0]);
-
-      let trackToEnable = tracks.find(track => getConsistentLabel(track) === targetLabel) || tracks[0];
-      tracks.forEach(track => {
-        track.mode = (track === trackToEnable) ? 'showing' : 'disabled';
-      });
-
-      setCaptionsLabel(getConsistentLabel(trackToEnable));
+      const lastActive = localStorage.getItem("player:lastActiveCaption");
+      const firstAvailable = tracks[0] ? (
+          { en: 'English', eng: 'English', de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[tracks[0].language] || tracks[0].label
+      ) : 'Disabled';
+      
+      setCaptionsLabel(lastActive || firstAvailable);
     }
-  }, [areCaptionsOn, captionsLabel, setCaptionsLabel, tracks, videoRef]);
+  }, [areCaptionsOn, setCaptionsLabel, tracks]);
 
+  // Keydown effect for 'C' key.
   useEffect(() => {
     let timer;
     function handleKeyDown(event) {

@@ -23,12 +23,16 @@ function Player({ poster = "", src = "" }) {
   const location = useLocation();
 
   // States for player UI
-  const [captionsLabel, setCaptionsLabel] = useState('Disabled');
   const [tracks, setTracks] = useState([]);
   const [qualities, setQualities] = useState([]);
   const [autoHeight, setAutoHeight] = useState(null);
 
-  // Get the saved quality.
+  // Get the saved captionsLabel.
+  const [captionsLabel, setCaptionsLabel] = useState(() => {
+    return localStorage.getItem("player:captions") || 'Disabled';
+  });
+
+  // Get the saved selected quality.
   const [selected, setSelected] = useState(() => {
     const saved = localStorage.getItem("player:quality");
     if (saved === "Auto") return "Auto";
@@ -40,7 +44,7 @@ function Player({ poster = "", src = "" }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
-    
+
     const shouldAutoplay = location.state?.fromThumbnail;
     setQualities([]);
 
@@ -101,6 +105,30 @@ function Player({ poster = "", src = "" }) {
     }
   }, [src, location.state]);
 
+  // Apply the saved captionsLabel whenever changes.
+  useEffect(() => {
+    const getConsistentLabel = (track) => {
+      const langMap = { en: 'English', eng: 'English', de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
+      return langMap[track.language] || track.label;
+    };
+
+    if (tracks.length === 0) return;
+
+    let trackFound = false;
+    tracks.forEach(track => {
+      if (getConsistentLabel(track) === captionsLabel) {
+        track.mode = 'showing';
+        trackFound = true;
+      } else {
+        track.mode = 'disabled';
+      }
+    });
+
+    if (!trackFound && captionsLabel !== 'Disabled') {
+      setCaptionsLabel(getConsistentLabel(tracks[0]));
+    }
+  }, [tracks, captionsLabel]);
+
   // Apply the saved quality whenever changes.
   useEffect(() => {
     const hls = hlsRef.current;
@@ -122,8 +150,20 @@ function Player({ poster = "", src = "" }) {
       }
     }
   }, [qualities, selected]);
-  
-  // Set the quality whenever changes.
+
+  // Save the captionsLabel whenever changes.
+  useEffect(() => {
+    try {
+      localStorage.setItem("player:captions", captionsLabel);
+      if (captionsLabel !== 'Disabled') {
+        localStorage.setItem("player:lastActiveCaption", captionsLabel);
+      }
+    } catch (err) {
+      console.error("[Player] Could not save caption state:", err);
+    }
+  }, [captionsLabel]);
+
+  // Save the qualityLabel whenever changes.
   useEffect(() => {
     try {
       localStorage.setItem("player:quality", selected.toString());
@@ -154,7 +194,6 @@ function Player({ poster = "", src = "" }) {
           <div className="spacer"></div>
 
           <Captions
-            videoRef={videoRef}
             captionsLabel={captionsLabel}
             setCaptionsLabel={setCaptionsLabel}
             tracks={tracks}

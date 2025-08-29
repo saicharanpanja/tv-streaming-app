@@ -16,8 +16,7 @@ const captionsLangTag = {
   ger: 'DE',
 };
 
-
-function getConsistentLabel(track) {
+const getConsistentLabel = (track) => {
   return captionsLangLabel[track.language] || track.label;
 };
 
@@ -29,16 +28,8 @@ export default function CaptionsMenu({
   isMenuOpen,
   tracks
 }) {
-  const handleSelect = (track) => {
-    tracks.forEach((t) => (t.mode = 'disabled'));
-
-    if (track) {
-      track.mode = 'showing';
-      setCaptionsLabel(getConsistentLabel(track));
-    } else {
-      setCaptionsLabel('Disabled');
-    }
-
+  const handleSelect = (label) => {
+    setCaptionsLabel(label);
     setActiveMenuTab('main');
   };
 
@@ -49,7 +40,6 @@ export default function CaptionsMenu({
       <div
         className="settings-menu captions-item"
         onClick={() => setActiveMenuTab('main')}
-        onKeyDown={(e) => e.key === 'Enter' && setActiveMenuTab('main')}
       >
         <CaretLeftIcon size={12} weight="bold" />
         <span>Captions</span>
@@ -59,7 +49,7 @@ export default function CaptionsMenu({
 
       {/* --- Disabled Option --- */}
       <div
-        onClick={() => handleSelect(null)}
+        onClick={() => handleSelect('Disabled')}
         className="settings-menu captions-item"
       >
         <span className={`settings-menu captions-item-radio${captionsLabel === 'Disabled' ? ' selected' : ''}`} />
@@ -72,14 +62,14 @@ export default function CaptionsMenu({
         return (
           <div
             key={track.language + track.label}
-            onClick={() => handleSelect(track)}
+            onClick={() => handleSelect(consistentLabel)}
             className="settings-menu captions-item"
           >
             <span className={`settings-menu captions-item-radio${captionsLabel === consistentLabel ? ' selected' : ''}`} />
             <span>{consistentLabel}</span>
-            <span
-              className={`settings-menu captions-item-label`}
-            >{captionsLangTag[track.language] || track.language.toUpperCase().slice(0, 2) || ""}</span>
+            <span className={`settings-menu captions-item-label`}>
+              {captionsLangTag[track.language] || track.language.toUpperCase().slice(0, 2) || ""}
+            </span>
           </div>
         );
       })}
