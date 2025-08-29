@@ -11,7 +11,7 @@ export default function Icon({
       style={{ width: size, height: size, fill: color }}
       onClick={onClick}
     >
-      <use xlinkHref={`#${name}`} />
+      <use href={`#${name}`} />
     </svg>
   ); 
 };
