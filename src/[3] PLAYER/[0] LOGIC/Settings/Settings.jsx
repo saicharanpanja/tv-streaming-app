@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Hls from "hls.js";
 
 import MainMenu from "./MainMenu";
 import SpeedMenu from "./SpeedMenu";
@@ -21,6 +22,7 @@ export default function Settings({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenuTab, setActiveMenuTab] = useState("none");
 
+  // Get the saved speed.
   const [playbackRate, setPlaybackRate] = useState(() => {
     const saved = localStorage.getItem("player:playbackRate");
     const n = parseFloat(saved);
@@ -34,6 +36,43 @@ export default function Settings({
     [playbackRate]
   );
 
+  // Apply the saved speed whenever changes.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    function applyInitialRate() {
+      try {
+        video.playbackRate = playbackRate;
+        if ("preservesPitch" in video) video.preservesPitch = true;
+        else if ("mozPreservesPitch" in video) video.mozPreservesPitch = true;
+        else if ("webkitPreservesPitch" in video) video.webkitPreservesPitch = true;
+      } catch (err) {
+        console.warn("[Player] Failed to apply playback rate:", playbackRate, err);
+      }
+    }
+
+    if (Hls.isSupported() || video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.addEventListener("loadedmetadata", applyInitialRate);
+      return () => {
+        video.removeEventListener("loadedmetadata", applyInitialRate);
+      };
+    }
+  }, [playbackRate, videoRef]);
+
+  // Set the speed whenever changes.
+  useEffect(() => {
+    try {
+      localStorage.setItem("player:playbackRate", playbackRate.toString());
+      const video = videoRef.current;
+      if (video && video.playbackRate !== playbackRate) {
+        video.playbackRate = playbackRate;
+      }
+    } catch (err) {
+      console.error("[Player] Could not save or apply playback rate:", playbackRate, err);
+    }
+  }, [playbackRate, videoRef]);
+
   return (
     <div className="video-controls settings-container">
       <Icon
@@ -46,17 +85,16 @@ export default function Settings({
       />
 
       <span
-        className={`settings-icon-quality-label-${
-          ((selected> 1440 && selected<=2160) || (selected==="Auto" && (autoHeight> 1440 && autoHeight<=2160))) ? "4k" :
-          ((selected>= 720 && selected<=1440) || (selected==="Auto" && (autoHeight>= 720 && autoHeight<=1440))) ? "hd" :
-          ((selected>= 480 && selected<720) || (selected==="Auto" && (autoHeight>= 480 && autoHeight<720))) ? "sd" :
-          ""
-        }`}
+        className={`settings-icon-quality-label-${((selected > 1440 && selected <= 2160) || (selected === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4k" :
+            ((selected >= 720 && selected <= 1440) || (selected === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "hd" :
+              ((selected >= 480 && selected < 720) || (selected === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "sd" :
+                ""
+          }`}
       >{
-        ((selected> 1440 && selected<=2160) || (selected==="Auto" && (autoHeight> 1440 && autoHeight<=2160))) ? "4K" :
-        ((selected>= 720 && selected<=1440) || (selected==="Auto" && (autoHeight>= 720 && autoHeight<=1440))) ? "HD" :
-        ((selected>= 480 && selected<720) || (selected==="Auto" && (autoHeight>= 480 && autoHeight<720))) ? "SD" :
-        ""
+          ((selected > 1440 && selected <= 2160) || (selected === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4K" :
+            ((selected >= 720 && selected <= 1440) || (selected === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "HD" :
+              ((selected >= 480 && selected < 720) || (selected === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "SD" :
+                ""
         }
       </span>
 
@@ -85,10 +123,8 @@ export default function Settings({
         activeMenuTab={activeMenuTab}
         setActiveMenuTab={setActiveMenuTab}
         isMenuOpen={isMenuOpen}
-
         playbackRate={playbackRate}
         setPlaybackRate={setPlaybackRate}
-        videoRef={videoRef}
       />
 
       <CaptionsMenu

@@ -39,11 +39,10 @@
 }
 
 .channel-thumbnail {
-  cursor: pointer;
   user-select: none;
-  display: block;
   width: 100%;
   border-radius: 12px;
+  transition: all 0.3s ease-in-out;
 }
 
 .channel-thumbnail.active {

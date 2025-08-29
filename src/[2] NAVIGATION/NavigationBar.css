@@ -44,11 +44,10 @@
 .nav-icon-wrapper {
   user-select: none;
   border-radius: 10px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .nav-icon-wrapper:hover {
@@ -58,7 +57,7 @@
 .nav-icon {
   user-select: none;
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .nav-icon.clicked {

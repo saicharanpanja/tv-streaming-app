@@ -26,15 +26,25 @@ function Player({ poster = "", src = "" }) {
   const [captionsLabel, setCaptionsLabel] = useState('Disabled');
   const [tracks, setTracks] = useState([]);
   const [qualities, setQualities] = useState([]);
-  const [selected, setSelected] = useState("Auto");
   const [autoHeight, setAutoHeight] = useState(null);
 
+  // Get the saved quality.
+  const [selected, setSelected] = useState(() => {
+    const saved = localStorage.getItem("player:quality");
+    if (saved === "Auto") return "Auto";
+    const n = parseInt(saved, 10);
+    return !isNaN(n) ? n : "Auto";
+  });
+
+  // HLS, quality heights, subtitles setup and teardown.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
     
     const shouldAutoplay = location.state?.fromThumbnail;
+    setQualities([]);
 
+    // Function to get the available Subtitles by filtering.
     function applyTracks() {
       const availableTracks = Array.from(video.textTracks).filter(
         (t) =>
@@ -48,24 +58,25 @@ function Player({ poster = "", src = "" }) {
       const hls = new Hls();
       hlsRef.current = hls;
 
+      // Get the available quality levels.
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         const map = new Map();
         hls.levels.forEach((level, index) => {
           const previous = map.get(level.height);
+          // Get the best bitrate of same heights if any.
           if (!previous || level.bitrate > previous.bitrate) {
             map.set(level.height, { levelIndex: index, bitrate: level.bitrate });
           }
         });
 
+        // Map new array without bitrates.
         const uniqueHeights = Array.from(map.entries())
           .map(([height, obj]) => ({ height, levelIndex: obj.levelIndex }))
           .sort((a, b) => a.height - b.height);
-
         setQualities(uniqueHeights);
-        setSelected("Auto");
-        hls.currentLevel = -1;
       });
 
+      // Set the AutoHeight if quality changes.
       hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
         const level = hls.levels?.[data.level];
         if (level?.height) setAutoHeight(level.height);
@@ -73,9 +84,8 @@ function Player({ poster = "", src = "" }) {
 
       hls.loadSource(src);
       hls.attachMedia(video);
-      shouldAutoplay && video.play().catch(()=> {});
+      shouldAutoplay && video.play().catch(() => { });
       video.addEventListener('loadedmetadata', applyTracks);
-
       return () => {
         hls.destroy();
         hlsRef.current = null;
@@ -83,13 +93,44 @@ function Player({ poster = "", src = "" }) {
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
-      shouldAutoplay && video.play().catch(()=> {});
+      shouldAutoplay && video.play().catch(() => { });
       video.addEventListener('loadedmetadata', applyTracks);
       return () => {
         video.removeEventListener('loadedmetadata', applyTracks);
-      }
+      };
     }
   }, [src, location.state]);
+
+  // Apply the saved quality whenever changes.
+  useEffect(() => {
+    const hls = hlsRef.current;
+    if (!hls || qualities.length === 0) return;
+
+    const preferredQualityAvailable = qualities.some(q => q.height === selected);
+
+    if (selected !== "Auto" && preferredQualityAvailable) {
+      const match = qualities.find(q => q.height === selected);
+      if (match && hls.currentLevel !== match.levelIndex) {
+        hls.currentLevel = match.levelIndex;
+      }
+    } else {
+      if (hls.currentLevel !== -1) {
+        hls.currentLevel = -1;
+      }
+      if (selected !== "Auto" && !preferredQualityAvailable) {
+        setSelected("Auto");
+      }
+    }
+  }, [qualities, selected]);
+  
+  // Set the quality whenever changes.
+  useEffect(() => {
+    try {
+      localStorage.setItem("player:quality", selected.toString());
+    } catch (err) {
+      console.error("[Player] Could not save quality:", selected, err);
+    }
+  }, [selected]);
 
   return (
     <div className="player-container" ref={containerRef}>

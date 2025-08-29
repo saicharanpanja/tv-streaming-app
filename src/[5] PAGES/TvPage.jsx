@@ -15,7 +15,7 @@ function TvPage() {
   return (
     <div className="tv-container">
       <Header color={isPlaying ? `${json[isPlaying].color}` : '#03581d'} />
-      <NavigationBar channel={isPlaying}/>
+      <NavigationBar channel={isPlaying} />
 
       {isPlaying && (
         <>
@@ -34,6 +34,8 @@ function TvPage() {
             key={key}
             to={`/tv/${key}`}
             state={{ fromThumbnail: true }}
+
+            className="channel-thumbnail"
           >
             <img
               className="channel-thumbnail"
