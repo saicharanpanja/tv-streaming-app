@@ -29,6 +29,7 @@ export default function Settings({
     return !isNaN(n) ? n : 1;
   });
 
+  // Get a speed Label
   const speedLabel = useMemo(
     () => (playbackRate === 1
       ? "Normal"

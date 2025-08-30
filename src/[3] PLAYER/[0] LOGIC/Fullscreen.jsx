@@ -4,6 +4,7 @@ import Icon from "../[2] UTILS/Icon";
 export default function Fullscreen({ containerRef }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Listen for fullscreen changes and update state
   useEffect(() => {
     function handleFullscreenChange() {
       setIsFullscreen(!!document.fullscreenElement);
@@ -34,6 +35,7 @@ export default function Fullscreen({ containerRef }) {
     }
   }, [containerRef]);
 
+  // Keydown effect for 'F' key.
   useEffect(() => {
     function handleKeyDown(event) {
       const { tagName } = event.target;

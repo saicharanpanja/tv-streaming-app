@@ -1,4 +1,4 @@
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useParams, useNavigate } from 'react-router-dom';
 
 import Header from '../[1] HEADER/Header'
 import NavigationBar from '../[2] NAVIGATION/NavigationBar'
@@ -9,8 +9,22 @@ import json from '../[4] DESCRIPTION/Utils/ChannelDesc.json'
 import './TvPage.css'
 
 function TvPage() {
+  const navigate = useNavigate();
+
   const { channelKey } = useParams();
   const isPlaying = channelKey && json[channelKey] ? channelKey : null;
+
+  // Prepare data to send to Player
+  const channelsArray = Object.keys(json);
+  const index = isPlaying ? channelsArray.indexOf(isPlaying) : -1;
+  const postersArray = channelsArray.map(key => json[key].src[0]);
+  const sourcesArray = channelsArray.map(key => json[key].src[1]);
+  const handleIndexChange = (newIndex) => {
+    const newChannelKey = channelsArray[newIndex];
+    if (newChannelKey) {
+      navigate(`/tv/${newChannelKey}`);
+    }
+  };
 
   return (
     <div className="tv-container">
@@ -20,8 +34,10 @@ function TvPage() {
       {isPlaying && (
         <>
           <Player
-            src={`${json[isPlaying].src[1]}`}
-            poster={`${json[isPlaying].src[0]}`}
+            sourcesArray={sourcesArray}
+            postersArray={postersArray}
+            index={index}
+            onIndexChange={handleIndexChange}
           />
           <ChannelDesc channel={isPlaying} />
         </>
@@ -33,8 +49,6 @@ function TvPage() {
           <NavLink
             key={key}
             to={`/tv/${key}`}
-            state={{ fromThumbnail: true }}
-
             className="channel-thumbnail"
           >
             <img

@@ -74,7 +74,9 @@
 }
 
 /*VIDEO CONTROLS CONTAINERS*/
+.video-controls.skip-previous-container,
 .video-controls.play-pause-container,
+.video-controls.skip-next-container,
 .video-controls.volume-container {
   display: flex;
   gap: 4px;
@@ -82,6 +84,16 @@
   padding: 1px 1.5px;
   background: transparent;
   border: none;
+}
+
+.video-controls.skip-previous-container,
+.video-controls.skip-next-container {
+  padding: 0;
+}
+
+.video-controls:disabled .video-controls-icons {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .video-controls.fullscreen-container,

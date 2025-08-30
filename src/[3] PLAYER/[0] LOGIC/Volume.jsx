@@ -7,6 +7,7 @@ export default function Volume({ videoRef }) {
   const [isMuted, setIsMuted] = useState(false);
   const [overlayData, setOverlayData] = useState(null);
 
+  // Sync volume and mute state with video element
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -42,6 +43,7 @@ export default function Volume({ videoRef }) {
     }
   }, [videoRef]);
 
+  // Keydown effect for '↑','↓','M' key.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;

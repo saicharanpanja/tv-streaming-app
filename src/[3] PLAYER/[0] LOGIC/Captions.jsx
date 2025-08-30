@@ -14,12 +14,12 @@ export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
     } else {
       const lastActive = localStorage.getItem("player:lastActiveCaption");
       const firstAvailable = tracks[0] ? (
-          { en: 'English', eng: 'English', de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[tracks[0].language] || tracks[0].label
+          { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[tracks[0].language] || tracks[0].label
       ) : 'Disabled';
       
       setCaptionsLabel(lastActive || firstAvailable);
     }
-  }, [areCaptionsOn, setCaptionsLabel, tracks]);
+  }, [areCaptionsOn, tracks, setCaptionsLabel]);
 
   // Keydown effect for 'C' key.
   useEffect(() => {

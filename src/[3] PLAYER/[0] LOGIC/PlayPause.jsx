@@ -6,18 +6,17 @@ export default function PlayPause({ videoRef }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [overlayData, setOverlayData] = useState(null);
 
+  // Track video play/pause state and clean up listeners
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
 
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
     video.addEventListener("ended", onPause);
-
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
@@ -36,6 +35,7 @@ export default function PlayPause({ videoRef }) {
     }
   }, [videoRef]);
 
+  // Click and Keydown effect for 'K' and 'Space' key.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -64,7 +64,6 @@ export default function PlayPause({ videoRef }) {
 
     video.addEventListener("click", handleInteraction);
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       video.removeEventListener("click", handleInteraction);
       document.removeEventListener("keydown", handleKeyDown);

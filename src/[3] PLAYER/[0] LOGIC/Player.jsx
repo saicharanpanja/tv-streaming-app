@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 import Hls from "hls.js";
 
 import Seekbar from "./Seekbar";
+import SkipPrev from "./SkipPrev";
 import PlayPause from "./PlayPause";
+import SkipNext from "./SkipNext";
 import Volume from "./Volume";
 import Captions from "./Captions";
 import Settings from "./Settings/Settings";
@@ -16,23 +17,33 @@ import "../[1] STYLES/Volume.css";
 import "../[1] STYLES/Settings.css";
 import "../[1] STYLES/Fullscreen.css";
 
-function Player({ poster = "", src = "" }) {
+function Player({
+  index = 0,
+  postersArray = [],
+  sourcesArray = [],
+  onIndexChange = () => { }
+}) {
+
+  //DOM References
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const containerRef = useRef(null);
-  const location = useLocation();
 
-  // States for player UI
+  //Get current Source and Poster and check hasPrev, hasNext
+  const [currentIndex, setCurrentIndex] = useState(index);
+  const currentSrc = sourcesArray[currentIndex];
+  const currentPos = postersArray[currentIndex];
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex < sourcesArray.length - 1;
+
+  useEffect(() => setCurrentIndex(index), [index]);
+
+  // States for Captions, Qualities.
   const [tracks, setTracks] = useState([]);
+  const [captionsLabel, setCaptionsLabel] = useState(() => localStorage.getItem("player:captions") || 'Disabled');
+
   const [qualities, setQualities] = useState([]);
   const [autoHeight, setAutoHeight] = useState(null);
-
-  // Get the saved captionsLabel.
-  const [captionsLabel, setCaptionsLabel] = useState(() => {
-    return localStorage.getItem("player:captions") || 'Disabled';
-  });
-
-  // Get the saved selected quality.
   const [selected, setSelected] = useState(() => {
     const saved = localStorage.getItem("player:quality");
     if (saved === "Auto") return "Auto";
@@ -40,12 +51,12 @@ function Player({ poster = "", src = "" }) {
     return !isNaN(n) ? n : "Auto";
   });
 
-  // HLS, quality heights, subtitles setup and teardown.
+  // HLS Setup, Get quality heights and subtitles and teardown.
   useEffect(() => {
+    console.log("hu")
     const video = videoRef.current;
-    if (!video || !src) return;
+    if (!video || !currentSrc) return;
 
-    const shouldAutoplay = location.state?.fromThumbnail;
     setQualities([]);
 
     // Function to get the available Subtitles by filtering.
@@ -86,9 +97,9 @@ function Player({ poster = "", src = "" }) {
         if (level?.height) setAutoHeight(level.height);
       });
 
-      hls.loadSource(src);
+      hls.loadSource(currentSrc);
       hls.attachMedia(video);
-      shouldAutoplay && video.play().catch(() => { });
+      video.play().catch(() => { });
       video.addEventListener('loadedmetadata', applyTracks);
       return () => {
         hls.destroy();
@@ -96,19 +107,19 @@ function Player({ poster = "", src = "" }) {
         video.removeEventListener('loadedmetadata', applyTracks);
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = src;
-      shouldAutoplay && video.play().catch(() => { });
+      video.src = currentSrc;
+      video.play().catch(() => { });
       video.addEventListener('loadedmetadata', applyTracks);
       return () => {
         video.removeEventListener('loadedmetadata', applyTracks);
       };
     }
-  }, [src, location.state]);
+  }, [currentSrc]);
 
   // Apply the saved captionsLabel whenever changes.
   useEffect(() => {
     const getConsistentLabel = (track) => {
-      const langMap = { en: 'English', eng: 'English', de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
+      const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
       return langMap[track.language] || track.label;
     };
 
@@ -172,6 +183,22 @@ function Player({ poster = "", src = "" }) {
     }
   }, [selected]);
 
+  const handlePrev = () => {
+    if (hasPrev) {
+      const newIndex = currentIndex - 1;
+      setCurrentIndex(newIndex);
+      onIndexChange(newIndex);
+    }
+  };
+
+  const handleNext = () => {
+    if (hasNext) {
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
+      onIndexChange(newIndex);
+    }
+  };
+
   return (
     <div className="player-container" ref={containerRef}>
       <IconSprite />
@@ -180,7 +207,7 @@ function Player({ poster = "", src = "" }) {
         ref={videoRef}
         crossOrigin="anonymous"
         className="video-wrapper"
-        poster={poster}
+        poster={currentPos}
         preload="metadata"
       />
 
@@ -188,7 +215,9 @@ function Player({ poster = "", src = "" }) {
         <Seekbar videoRef={videoRef} />
 
         <div className="video-controls-container-bottom">
+          <SkipPrev onPrev={handlePrev} isDisabled={!hasPrev} />
           <PlayPause videoRef={videoRef} />
+          <SkipNext onNext={handleNext} isDisabled={!hasNext} />
           <Volume videoRef={videoRef} />
 
           <div className="spacer"></div>
