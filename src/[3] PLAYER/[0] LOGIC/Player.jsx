@@ -53,7 +53,6 @@ function Player({
 
   // HLS Setup, Get quality heights and subtitles and teardown.
   useEffect(() => {
-    console.log("hu")
     const video = videoRef.current;
     if (!video || !currentSrc) return;
 

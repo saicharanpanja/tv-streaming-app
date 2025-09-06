@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 15px;
+  padding: 0 10px;
 }
 
 /* SEEKBAR STYLES */
@@ -12,53 +12,52 @@
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
-  height: 5px;
   cursor: pointer;
-  border-radius: 6px;
+  
   z-index: 1;
 }
 
 .video-controls-inputs.seekbar::-webkit-slider-runnable-track {
-  height: 5px;
+  height: 4px;
   background: transparent;
-  border-radius: 6px;
+  
 }
 
 .video-controls-inputs.seekbar::-moz-range-track {
-  height: 5px;
+  height: 4px;
   background: transparent;
-  border-radius: 6px;
+  
 }
 
 /* BUFFER PROGRESS STYLES */
 .buffered-progress {
   position: absolute;
-  height: 5px;
+  height: 4px;
   width: auto;
-  left: 17px;
-  right: 17px;
+  left: 12px;
+  right: 12px;
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 6px;
+  
   z-index: 0;
   pointer-events: none;
   transition: all 0.3s ease-in-out;
 }
 
 .buffered-progress::-webkit-progress-bar {
-  height: 5px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 4px;
+  
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .buffered-progress::-webkit-progress-value {
   background-color: rgba(210, 210, 210, 0.8);
-  border-radius: 6px;
+  
 }
 
 .buffered-progress::-moz-progress-bar {
   background-color: rgba(210, 210, 210, 0.8);
-  border-radius: 6px;
+  
 }
 
 .buffered-progress.buffering {
@@ -71,7 +70,7 @@
   );
   animation: zebraMove 1s linear infinite;
   will-change: background-position;
-  border-radius: 6px;
+  
   
 }
 
@@ -88,8 +87,8 @@
 .video-controls-inputs.seekbar::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #fafafa;
   cursor: pointer;
@@ -104,8 +103,8 @@
 }
 
 .video-controls-inputs.seekbar::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #fafafa;
   cursor: pointer;

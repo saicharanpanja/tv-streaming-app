@@ -49,7 +49,7 @@ export default function Seekbar({ videoRef }) {
             }
             bufferedEnd = video.buffered.end(video.buffered.length - 1);
           }
-          const bufferedPercent = ((bufferedEnd / video.duration) * 100) + 0.3;
+          const bufferedPercent = ((bufferedEnd / video.duration) * 100);
           setBufferedProgress(bufferedPercent);
         }
       }
