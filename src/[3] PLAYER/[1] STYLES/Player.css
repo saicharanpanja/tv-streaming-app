@@ -9,6 +9,9 @@
   background-color: black;
   aspect-ratio: 16 / 9;
 }
+.player-container.hide-cursor {
+  cursor: none;
+}
 
 .video-wrapper {
   position: absolute;
@@ -18,12 +21,6 @@
   height: 100%;
   object-fit: contain;
   border: none;
-}
-
-.player-container:hover .video-controls-container {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0%);
 }
 
 /*CONTROLS CONTAINER*/
@@ -37,10 +34,18 @@
   background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
+
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0%);
+  transition: all 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.video-controls-container.hide {
   opacity: 0;
-  visibility: hidden;
-  transform: translateY(100%);
-  transition: all 0.5s ease-in-out;
+  visibility: hidden;  
+  transform: translateY(2%);
 }
 
 .video-controls-container-bottom {
@@ -84,6 +89,7 @@
   padding: 1px 1.5px;
   background: transparent;
   border: none;
+  pointer-events: auto;
 }
 
 .video-controls.skip-previous-container,
@@ -97,6 +103,7 @@
 }
 
 .video-controls.fullscreen-container,
+.video-controls.music-mode-container,
 .video-controls.captions-container,
 .video-controls.settings-container {
   display: flex;
@@ -104,6 +111,7 @@
   padding: 1px 3.25px;
   background: transparent;
   border: none;
+  pointer-events: auto;
 }
 
 /*VIDEO CONTROLS SPACER*/

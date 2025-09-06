@@ -48,11 +48,11 @@ export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
     <button className="video-controls captions-container" onClick={toggleCaptions}>
       <Icon
         name="captions-off"
-        className={`video-controls-icons captions-on${!areCaptionsOn ? "" : " hide"}`}
+        className={`video-controls-icons captions-off${!areCaptionsOn ? "" : " hide"}`}
       />
       <Icon
         name="captions-on"
-        className={`video-controls-icons captions-off${areCaptionsOn ? "" : " hide"}`}
+        className={`video-controls-icons captions-on${areCaptionsOn ? "" : " hide"}`}
       />
       {overlayData &&
         createPortal(

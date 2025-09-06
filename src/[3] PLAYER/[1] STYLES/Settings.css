@@ -21,7 +21,6 @@
   bottom: 16.5px;
   right: -3.5px;
 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   font-size: 8.5px;
   font-weight: bold;
@@ -49,7 +48,6 @@
 .settings-menu.captions,
 .settings-menu.quality,
 .settings-menu.speed   {
-  font-family: "Roboto", Arial, sans-serif;
   font-size: 13.5px;
 
   background-color: rgba(255,255,255,0.95);

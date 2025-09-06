@@ -7,6 +7,7 @@ import PlayPause from "./PlayPause";
 import SkipNext from "./SkipNext";
 import Volume from "./Volume";
 import Captions from "./Captions";
+import MusicMode from "./MusicMode";
 import Settings from "./Settings/Settings";
 import Fullscreen from "./Fullscreen";
 import IconSprite from "../[2] UTILS/IconSprite";
@@ -28,6 +29,12 @@ function Player({
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const containerRef = useRef(null);
+  const hideControlsTimeout = useRef(null);
+  const isHoveringControlsRef = useRef(false);
+
+  // UI Visibility State
+  const [isPaused, setIsPaused] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(true);
 
   //Get current Source and Poster and check hasPrev, hasNext
   const [currentIndex, setCurrentIndex] = useState(index);
@@ -35,7 +42,6 @@ function Player({
   const currentPos = postersArray[currentIndex];
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < sourcesArray.length - 1;
-
   useEffect(() => setCurrentIndex(index), [index]);
 
   // States for Captions, Qualities.
@@ -50,6 +56,30 @@ function Player({
     const n = parseInt(saved, 10);
     return !isNaN(n) ? n : "Auto";
   });
+
+  // Listen to core video events (play, pause, ended)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsPaused(false);
+    const handlePause = () => setIsPaused(true);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handlePause);
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handlePause);
+    };
+  }, []);
+
+  // Manage controls visibility when play/pause state changes
+  useEffect(() => {
+    clearTimeout(hideControlsTimeout.current);
+    isPaused ? setControlsVisible(true)
+      : hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000);
+  }, [isPaused]);
 
   // HLS Setup, Get quality heights and subtitles and teardown.
   useEffect(() => {
@@ -199,7 +229,20 @@ function Player({
   };
 
   return (
-    <div className="player-container" ref={containerRef}>
+    <div
+      ref={containerRef}
+      className={`player-container${isPaused || controlsVisible ? "" : " hide-cursor"}`}
+      onMouseLeave={() => !isPaused && (
+        clearTimeout(hideControlsTimeout.current),
+        setControlsVisible(false))
+      }
+      onMouseMove={() => {
+        if (isPaused) return;
+        clearTimeout(hideControlsTimeout.current);
+        setControlsVisible(true);
+        !isHoveringControlsRef.current && (hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000))
+      }}
+    >
       <IconSprite />
 
       <video
@@ -210,7 +253,11 @@ function Player({
         preload="metadata"
       />
 
-      <div className="video-controls-container">
+      <div
+        className={`video-controls-container${isPaused || controlsVisible ? "" : " hide"}`}
+        onMouseEnter={() => isHoveringControlsRef.current = true}
+        onMouseLeave={() => isHoveringControlsRef.current = false}
+      >
         <Seekbar videoRef={videoRef} />
 
         <div className="video-controls-container-bottom">
@@ -226,6 +273,8 @@ function Player({
             setCaptionsLabel={setCaptionsLabel}
             tracks={tracks}
           />
+
+          <MusicMode />
 
           <Settings
             videoRef={videoRef}
