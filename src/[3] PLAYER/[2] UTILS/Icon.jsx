@@ -8,7 +8,7 @@ export default function Icon({
   return (
     <svg
       className={className}
-      style={{ width: size, height: size, fill: color }}
+      style={{ width: size, height: size, fill: color, cursor: "pointer" }}
       onClick={onClick}
     >
       <use href={`#${name}`} />

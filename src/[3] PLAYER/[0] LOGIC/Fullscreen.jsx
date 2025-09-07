@@ -50,10 +50,7 @@ export default function Fullscreen({ containerRef }) {
 
   return (
     <button className="video-controls fullscreen-container" onClick={toggleFullscreen}>
-      <Icon
-        name={isFullscreen ? "exit-fullscreen" : "enter-fullscreen"}
-        className="video-controls-icons"
-      />
+      <Icon name={isFullscreen ? "exit-fullscreen" : "enter-fullscreen"}/>
     </button>
   );
 }

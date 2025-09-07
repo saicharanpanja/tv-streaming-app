@@ -29,7 +29,7 @@ export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
       if (tagName === "INPUT" || tagName === "TEXTAREA") return;
 
       if (event.code === "KeyC") {
-        const iconName = areCaptionsOn ? "captions-off" : "captions-on";
+        const iconName = "captions";
         setOverlayData({ name: iconName, id: Date.now() });
         clearTimeout(timer);
         timer = setTimeout(() => setOverlayData(null), 500);
@@ -46,14 +46,8 @@ export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
 
   return (
     <button className="video-controls captions-container" onClick={toggleCaptions}>
-      <Icon
-        name="captions-off"
-        className={`video-controls-icons captions-off${!areCaptionsOn ? "" : " hide"}`}
-      />
-      <Icon
-        name="captions-on"
-        className={`video-controls-icons captions-on${areCaptionsOn ? "" : " hide"}`}
-      />
+      <Icon name="captions"/>
+      <span className={`captions-underline${areCaptionsOn ? "" : " hide"}`}/>
       {overlayData &&
         createPortal(
           <div key={overlayData.id} className="overlay-wrapper">

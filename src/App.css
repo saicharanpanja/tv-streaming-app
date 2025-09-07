@@ -5,22 +5,15 @@
 }
 
 @font-face {
-  font-family: 'Gabarito'; 
-  src: url('/Gabarito.ttf') format('truetype'); 
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Outfit';
-  src: url('/Outfit.ttf') format('truetype');
+  font-family: 'OpenSans';
+  src: url('/OpenSans.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 html,
 body {
-  font-family: "Outfit", sans-serif;
+  font-family: "OpenSans", sans-serif;
   font-size: small;
   margin: 0;
   padding: 0;

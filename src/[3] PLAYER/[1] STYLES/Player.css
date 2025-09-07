@@ -71,9 +71,9 @@
 
 .video-controls-icons.pause,
 .video-controls-icons.exit-fullscreen,
-.video-controls-icons.captions-off,
 .video-controls-icons.volume-up,
-.video-controls-icons.volume-down {
+.video-controls-icons.volume-down,
+.video-controls-icons.music-mode-off {
   position: absolute;
   left: 1;
 }
@@ -83,13 +83,16 @@
 .video-controls.play-pause-container,
 .video-controls.skip-next-container,
 .video-controls.volume-container {
+  position: relative;
   display: flex;
+  justify-content: center;
   gap: 4px;
   align-items: center;
   padding: 1px 1.5px;
   background: transparent;
   border: none;
   pointer-events: auto;
+  cursor: pointer;
 }
 
 .video-controls.skip-previous-container,
@@ -106,12 +109,29 @@
 .video-controls.music-mode-container,
 .video-controls.captions-container,
 .video-controls.settings-container {
+  position: relative;
   display: flex;
+  justify-content: center;
   align-items: center;
   padding: 1px 3.25px;
   background: transparent;
   border: none;
   pointer-events: auto;
+  cursor: pointer;
+}
+
+.captions-underline {
+  position: absolute;
+  bottom: -1px;
+  height: 2.5px;
+  border-radius: 3px;
+  background: #2f7d48;
+  width: 65%;
+  transition: all 0.2s ease-in-out;
+}
+
+.captions-underline.hide {
+  width: 0;
 }
 
 /*VIDEO CONTROLS SPACER*/

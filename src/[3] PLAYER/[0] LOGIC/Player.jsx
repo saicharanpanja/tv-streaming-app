@@ -231,7 +231,7 @@ function Player({
   return (
     <div
       ref={containerRef}
-      className={`player-container${isPaused || controlsVisible ? "" : " hide-cursor"}`}
+      className={`player-container${controlsVisible ? "" : " hide-cursor"}`}
       onMouseLeave={() => !isPaused && (
         clearTimeout(hideControlsTimeout.current),
         setControlsVisible(false))
@@ -254,7 +254,7 @@ function Player({
       />
 
       <div
-        className={`video-controls-container${isPaused || controlsVisible ? "" : " hide"}`}
+        className={`video-controls-container${controlsVisible ? "" : " hide"}`}
         onMouseEnter={() => isHoveringControlsRef.current = true}
         onMouseLeave={() => isHoveringControlsRef.current = false}
       >
