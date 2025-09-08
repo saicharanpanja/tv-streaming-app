@@ -8,6 +8,8 @@
   overflow: hidden;
   background-color: black;
   aspect-ratio: 16 / 9;
+
+  container-type: inline-size;
 }
 .player-container.hide-cursor {
   cursor: none;
@@ -191,4 +193,35 @@
 
 .overlay-wrapper-rewind {
   left: 20%;
+}
+
+/* Captions Styling */
+.video-captions-container {
+  position: absolute;
+  inset: auto 0 2%;
+  text-align: center;
+  pointer-events: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.player-container.controls-visible .video-captions-container {
+  bottom: 60px;
+}
+
+.video-captions-container span {
+  display: inline;
+  line-height: 1.5; 
+  white-space: pre-wrap;
+  font-family: "captions";
+  font-size: clamp(14px, 2cqw, 22px);
+
+  color: white;
+  padding: 1.8px 10px; 
+  border-radius: 4px;
+  box-decoration-break: clone;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.video-wrapper::cue {
+  visibility: hidden;
 }

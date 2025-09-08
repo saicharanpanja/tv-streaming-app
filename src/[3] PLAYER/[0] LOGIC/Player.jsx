@@ -47,6 +47,7 @@ function Player({
   // States for Captions, Qualities.
   const [tracks, setTracks] = useState([]);
   const [captionsLabel, setCaptionsLabel] = useState(() => localStorage.getItem("player:captions") || 'Disabled');
+  const [captionsText, setCaptionsText] = useState("");
 
   const [qualities, setQualities] = useState([]);
   const [autoHeight, setAutoHeight] = useState(null);
@@ -72,7 +73,7 @@ function Player({
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handlePause);
     };
-  }, []);
+  }, [currentSrc]);
 
   // Manage controls visibility when play/pause state changes
   useEffect(() => {
@@ -91,9 +92,7 @@ function Player({
     // Function to get the available Subtitles by filtering.
     function applyTracks() {
       const availableTracks = Array.from(video.textTracks).filter(
-        (t) =>
-          t.cues != null &&
-          (t.kind === "subtitles" || t.kind === "captions")
+        (t) => t.kind === "subtitles" || t.kind === "captions"
       );
       setTracks(availableTracks);
     }
@@ -147,26 +146,39 @@ function Player({
 
   // Apply the saved captionsLabel whenever changes.
   useEffect(() => {
-    const getConsistentLabel = (track) => {
-      const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
-      return langMap[track.language] || track.label;
-    };
+    if (tracks.length > 0) {
+      const getConsistentLabel = track => {
+        const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
+        return langMap[track.language] || track.label;
+      };
 
-    if (tracks.length === 0) return;
+      let trackFound = null;
+      tracks.forEach(track => {
+        if (getConsistentLabel(track) === captionsLabel) {
+          track.mode = 'hidden';
+          trackFound = track;
+        } else {
+          track.mode = 'disabled';
+        }
+      });
 
-    let trackFound = false;
-    tracks.forEach(track => {
-      if (getConsistentLabel(track) === captionsLabel) {
-        track.mode = 'showing';
-        trackFound = true;
-      } else {
-        track.mode = 'disabled';
+      if (trackFound) {
+        const handleCueChange = () => {
+          const text = trackFound.activeCues?.[0]?.text || '';
+          setCaptionsText(text.replace(/<[^>]+>/g, ''));
+        }
+
+        handleCueChange();
+        trackFound.addEventListener('cuechange', handleCueChange);
+        return () => {
+          trackFound.removeEventListener('cuechange', handleCueChange);
+        };
+      } else setCaptionsText('');
+
+      if (!trackFound && captionsLabel !== 'Disabled') {
+        setCaptionsLabel(getConsistentLabel(tracks[0]));
       }
-    });
-
-    if (!trackFound && captionsLabel !== 'Disabled') {
-      setCaptionsLabel(getConsistentLabel(tracks[0]));
-    }
+    } else setCaptionsText('');
   }, [tracks, captionsLabel]);
 
   // Apply the saved quality whenever changes.
@@ -231,11 +243,8 @@ function Player({
   return (
     <div
       ref={containerRef}
-      className={`player-container${controlsVisible ? "" : " hide-cursor"}`}
-      onMouseLeave={() => !isPaused && (
-        clearTimeout(hideControlsTimeout.current),
-        setControlsVisible(false))
-      }
+      className={`player-container${controlsVisible ? " controls-visible" : " hide-cursor"}`}
+      onMouseLeave={() => !isPaused && (clearTimeout(hideControlsTimeout.current), setControlsVisible(false))}
       onMouseMove={() => {
         if (isPaused) return;
         clearTimeout(hideControlsTimeout.current);
@@ -246,6 +255,7 @@ function Player({
       <IconSprite />
 
       <video
+        key={currentSrc}
         ref={videoRef}
         crossOrigin="anonymous"
         className="video-wrapper"
@@ -253,26 +263,34 @@ function Player({
         preload="metadata"
       />
 
+      {(captionsText && captionsLabel !== "Disabled") &&
+        <div className="video-captions-container">
+          <span>{captionsText}</span>
+        </div>
+      }
+
       <div
         className={`video-controls-container${controlsVisible ? "" : " hide"}`}
         onMouseEnter={() => isHoveringControlsRef.current = true}
         onMouseLeave={() => isHoveringControlsRef.current = false}
       >
-        <Seekbar videoRef={videoRef} />
+        <Seekbar videoRef={videoRef} currentSrc={currentSrc} />
 
         <div className="video-controls-container-bottom">
           <SkipPrev onPrev={handlePrev} isDisabled={!hasPrev} />
-          <PlayPause videoRef={videoRef} />
+          <PlayPause videoRef={videoRef} currentSrc={currentSrc} />
           <SkipNext onNext={handleNext} isDisabled={!hasNext} />
-          <Volume videoRef={videoRef} />
+          <Volume videoRef={videoRef} currentSrc={currentSrc} />
 
           <div className="spacer"></div>
 
-          <Captions
-            captionsLabel={captionsLabel}
-            setCaptionsLabel={setCaptionsLabel}
-            tracks={tracks}
-          />
+          {tracks.length !== 0 &&
+            <Captions
+              captionsLabel={captionsLabel}
+              setCaptionsLabel={setCaptionsLabel}
+              tracks={tracks}
+            />
+          }
 
           <MusicMode />
 
@@ -286,6 +304,7 @@ function Player({
             selected={selected}
             setSelected={setSelected}
             autoHeight={autoHeight}
+            currentSrc={currentSrc}
           />
 
           <Fullscreen containerRef={containerRef} />

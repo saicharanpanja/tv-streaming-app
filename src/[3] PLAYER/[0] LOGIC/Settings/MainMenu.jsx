@@ -1,26 +1,29 @@
 import { CaretRightIcon } from '@phosphor-icons/react';
 
 export default function MainMenu({
-  setActiveMenuTab, 
+  setActiveMenuTab,
   activeMenuTab,
   speedLabel,
   captionsLabel,
-  qualityLabel
+  qualityLabel,
+  tracks
 }) {
   return (
     <div
       className={`settings-menu main${activeMenuTab === "main" ? "" : " hide"}`}
     >
-      <div
-        className="settings-menu main-item"
-        onClick={() => setActiveMenuTab("captions")}
-        onKeyDown={(e) => e.key === "Enter" && setActiveMenuTab("captions")}
-      >
-        <span>Captions</span>
-        <span className="spacer"></span>
-        <span>{captionsLabel}</span>
-        <CaretRightIcon size={10} style={{ marginLeft: "-6px" }} />
-      </div>
+      {tracks.length !== 0 &&
+        <div
+          className="settings-menu main-item"
+          onClick={() => setActiveMenuTab("captions")}
+          onKeyDown={(e) => e.key === "Enter" && setActiveMenuTab("captions")}
+        >
+          <span>Captions</span>
+          <span className="spacer"></span>
+          <span>{captionsLabel}</span>
+          <CaretRightIcon size={10} style={{ marginLeft: "-6px" }} />
+        </div>
+      }
 
       <div
         className="settings-menu main-item"

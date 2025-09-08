@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function Volume({ videoRef }) {
+export default function Volume({ videoRef, currentSrc }) {
   const [volume, setVolume] = useState(0.75);
   const [isMuted, setIsMuted] = useState(false);
   const [overlayData, setOverlayData] = useState(null);
@@ -23,7 +23,7 @@ export default function Volume({ videoRef }) {
     return () => {
       video.removeEventListener("volumechange", handleVolumeChange);
     };
-  }, [videoRef]);
+  }, [videoRef, currentSrc]);
 
   const changeVolume = useCallback((e) => {
     const video = videoRef.current;
@@ -88,7 +88,7 @@ export default function Volume({ videoRef }) {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
     };
-  }, [toggleMute, videoRef]);
+  }, [toggleMute, videoRef, currentSrc]);
 
   return (
     <div className="video-controls volume-container">

@@ -1,81 +1,73 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function Seekbar({ videoRef }) {
+export default function Seekbar({ videoRef, currentSrc }) {
+  const isSeeking = useRef(false);
+  const wasPlayingBeforeSeek = useRef(false);
+  const animationFrameId = useRef();
+
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [bufferedProgress, setBufferedProgress] = useState(0);
+
   const [isBuffering, setIsBuffering] = useState(false);
+  const [bufferedProgress, setBufferedProgress] = useState(0);
+
+  const [isHovering, setIsHovering] = useState(false);
+  const [hoverProgress, setHoverProgress] = useState(0);
+
   const [overlayData, setOverlayData] = useState(null);
 
-  const isSeekingRef = useRef(false);
-  const rafRef = useRef(null);
-  const ignoreBufferUpdateRef = useRef(false);
-  const bufferUpdateTimeoutRef = useRef(null);
-
+  // Sync duration, progress, buffered progress with video element
   useEffect(() => {
-    const video = videoRef?.current;
+    const video = videoRef.current;
     if (!video) return;
 
-    let mounted = true;
-
-    function update() {
-      if (!mounted) return;
-
-      if (video.duration && isFinite(video.duration) && video.duration > 0) {
-        setDuration(video.duration);
-      }
-
-      if (!isSeekingRef.current && video.duration && !isNaN(video.currentTime)) {
+    const updateProgress = () => {
+      if (!isSeeking.current) {
         const percentage = (video.currentTime / video.duration) * 100;
         setProgress(Number.isFinite(percentage) ? percentage : 0);
       }
 
-
-      if ((isSeekingRef.current || ignoreBufferUpdateRef.current)
-        || (video.paused && video.readyState < 2)) {
-        setBufferedProgress(0);
-      } else {
-        if (video.buffered && video.duration) {
-          let bufferedEnd = 0;
-          for (let i = 0; i < video.buffered.length; i++) {
-            if (
-              video.buffered.start(i) <= video.currentTime &&
-              video.currentTime <= video.buffered.end(i)
-            ) {
-              bufferedEnd = video.buffered.end(i);
-              break;
-            }
-            bufferedEnd = video.buffered.end(video.buffered.length - 1);
+      if (video.buffered.length > 0 && video.duration > 0) {
+        for (let i = video.buffered.length - 1; i >= 0; i--) {
+          if (video.buffered.start(i) <= video.currentTime) {
+            const bufferedEnd = video.buffered.end(i);
+            const bufferedPercentage = (bufferedEnd / video.duration) * 100;
+            setBufferedProgress(bufferedPercentage);
+            break;
           }
-          const bufferedPercent = ((bufferedEnd / video.duration) * 100);
-          setBufferedProgress(bufferedPercent);
         }
       }
 
-      rafRef.current = requestAnimationFrame(update);
-    }
-
-    const startLoop = () => rafRef.current = !rafRef.current && requestAnimationFrame(update);
-    const onWaiting = () => setIsBuffering(true);
-    const onPlaying = () => setIsBuffering(false);
-
-    video.addEventListener("loadedmetadata", startLoop);
-    video.addEventListener("waiting", onWaiting);
-    video.addEventListener("playing", onPlaying);
-    if (video.readyState >= 1) startLoop();
-
-    return () => {
-      mounted = false;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (bufferUpdateTimeoutRef.current) clearTimeout(bufferUpdateTimeoutRef.current);
-      video.removeEventListener("loadedmetadata", startLoop);
-      video.removeEventListener("waiting", onWaiting);
-      video.removeEventListener("playing", onPlaying);
+      animationFrameId.current = requestAnimationFrame(updateProgress);
     };
-  }, [videoRef]);
 
+    const updateDuration = () => {
+      const newDuration = video.duration;
+      setDuration(Number.isFinite(newDuration) ? newDuration : 0);
+    };
+
+    const handleWaiting = () => setIsBuffering(true);
+    const handlePlaying = () => setIsBuffering(false);
+
+    updateDuration();
+    updateProgress();
+
+    video.addEventListener("loadedmetadata", updateDuration);
+    video.addEventListener("durationchange", updateDuration);
+    video.addEventListener("waiting", handleWaiting);
+    video.addEventListener("playing", handlePlaying);
+    return () => {
+      video.removeEventListener("loadedmetadata", updateDuration);
+      video.removeEventListener("durationchange", updateDuration);
+      video.removeEventListener("waiting", handleWaiting);
+      video.removeEventListener("playing", handlePlaying);
+      cancelAnimationFrame(animationFrameId.current);
+    };
+  }, [videoRef, currentSrc]);
+
+  // Keydown effect for '←','→','J','L' keys.
   useEffect(() => {
     let timer;
 
@@ -105,9 +97,7 @@ export default function Seekbar({ videoRef }) {
         event.preventDefault();
         seekRelative(-10);
         iconName = "rewind-10";
-      } else {
-        return;
-      }
+      } else return;
 
       if (iconName) {
         setOverlayData({ name: iconName, id: Date.now() });
@@ -121,41 +111,52 @@ export default function Seekbar({ videoRef }) {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
     };
-  }, [videoRef]);
+  }, [videoRef, currentSrc]);
 
-  const handleSeekEnd = useCallback(() => {
-    window.removeEventListener("pointerup", handleSeekEnd);
-    isSeekingRef.current = false;
-    const video = videoRef?.current;
-    if (!video || !video.duration) return;
+  const handleMouseUp = () => {
+    isSeeking.current = false;
+    const video = videoRef.current;
+    if (!video) return;
 
-    // Ignore buffer updates briefly after seek ends to prevent jump to 100%
-    ignoreBufferUpdateRef.current = true;
-    if (bufferUpdateTimeoutRef.current) clearTimeout(bufferUpdateTimeoutRef.current);
-    bufferUpdateTimeoutRef.current = setTimeout(() => {
-      ignoreBufferUpdateRef.current = false;
-    }, 600); // 600ms delay, tweak if needed
+    if (wasPlayingBeforeSeek.current) {
+      video.play();
+    }
+  };
 
-    const sec = (progress / 100) * video.duration;
-    video.currentTime = Math.min(Math.max(sec, 0), video.duration);
-  }, [progress, videoRef, isSeekingRef, ignoreBufferUpdateRef, bufferUpdateTimeoutRef]);
+  const handleMouseDown = () => {
+    const video = videoRef.current;
+    if (!video) return;
 
-  useEffect(() => {
-    return () => {
-      window.removeEventListener("pointerup", handleSeekEnd);
-    };
-  }, [handleSeekEnd]);
+    isSeeking.current = true;
+    wasPlayingBeforeSeek.current = !video.paused;
+    if (wasPlayingBeforeSeek.current) {
+      video.pause();
+    }
+  };
 
-  function handleSeekStart() {
-    isSeekingRef.current = true;
-    window.addEventListener("pointerup", handleSeekEnd);
-  }
+  const handleChange = (e) => {
+    const video = videoRef.current;
+    if (!duration) return;
 
-  function handleSeekChange(e) {
-    const val = parseFloat(e.target.value);
-    if (Number.isNaN(val)) return;
-    setProgress(val);
-  }
+    isSeeking.current = true;
+    const seekPercentage = parseFloat(e.target.value);
+    video.currentTime = (duration / 100) * seekPercentage;
+    setProgress(seekPercentage);
+  };
+
+  const handleMouseMove = (e) => {
+    const seekbar = e.currentTarget;
+    const rect = seekbar.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const percentage = (offsetX / rect.width) * 100;
+
+    setHoverProgress(Math.max(0, Math.min(percentage, 100)));
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
 
   const gradientStyle = {
     background: `linear-gradient(to right, rgb(47, 125, 72) 0%, rgb(47, 125, 72) ${progress}%, transparent ${progress}%, transparent 100%)`,
@@ -167,30 +168,38 @@ export default function Seekbar({ videoRef }) {
         type="range"
         min={0}
         max={100}
-        step={0.01}
+        step={0.1}
         value={progress}
-        onPointerDown={handleSeekStart}
-        onMouseDown={handleSeekStart}
-        onTouchStart={handleSeekStart}
-        onChange={handleSeekChange}
-        onPointerUp={handleSeekEnd}
-        onMouseUp={handleSeekEnd}
-        onTouchEnd={handleSeekEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onChange={handleChange}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         className="video-controls-inputs seekbar"
         style={gradientStyle}
-        aria-label="Seek"
       />
+
       <progress
-        className={`buffered-progress ${isBuffering ? "buffering" : ""}`}
+        className={`buffered-progress${isBuffering ? " buffering" : ""}${isHovering ? " hovering" : ""}`}
+        min={0}
         max={100}
         value={isBuffering ? 0 : bufferedProgress}
         aria-hidden="true"
       />
 
+      <progress
+        className={"hovered-progress"}
+        min={0}
+        max={100}
+        value={hoverProgress}
+        style={{ opacity: isHovering ? 1 : 0 }}
+        aria-hidden="true"
+      />
+
       {overlayData && createPortal(
-        <div 
-          key={overlayData.id} 
-          className={`overlay-wrapper-${overlayData.name==="forward-10" ? "forward" : "rewind"}`}>
+        <div
+          key={overlayData.id}
+          className={`overlay-wrapper-${overlayData.name === "forward-10" ? "forward" : "rewind"}`}>
           <Icon
             name={overlayData.name}
             size="3.5vw"

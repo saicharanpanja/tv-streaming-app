@@ -14,24 +14,22 @@
   appearance: none;
   background: transparent;
   cursor: pointer;
-  
-  z-index: 1;
+  z-index: 3;
 }
 
 .video-controls-inputs.seekbar::-webkit-slider-runnable-track {
   height: 4px;
   background: transparent;
-  
 }
 
 .video-controls-inputs.seekbar::-moz-range-track {
   height: 4px;
   background: transparent;
-  
 }
 
 /* BUFFER PROGRESS STYLES */
-.buffered-progress {
+.buffered-progress,
+.hovered-progress {
   position: absolute;
   height: 4px;
   width: auto;
@@ -39,46 +37,62 @@
   right: 12px;
   -webkit-appearance: none;
   appearance: none;
-  
+
   z-index: 0;
   pointer-events: none;
-  transition: all 0.3s ease-in-out;
+}
+
+.hovered-progress {
+  z-index: 1;
+  transition: all 0.15s ease-in-out;
 }
 
 .buffered-progress::-webkit-progress-bar {
   height: 4px;
-  
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.5s ease-in-out;
 }
 
 .buffered-progress::-webkit-progress-value {
-  background-color: rgba(210, 210, 210, 0.8);
-  
+  background-color: rgba(210, 210, 210, 0.6);
+  transition: all 0.25s ease-in-out;
+  mix-blend-mode: difference;
 }
 
-.buffered-progress::-moz-progress-bar {
-  background-color: rgba(210, 210, 210, 0.8);
-  
+/* During Hover*/
+.buffered-progress.hovering::-webkit-progress-bar {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.buffered-progress.hovering::-webkit-progress-value {
+  background-color: rgba(210, 210, 210, 0.475);
+}
+
+.hovered-progress::-webkit-progress-bar {
+  height: 4px;
+  background: transparent;
+  transition: none;
+}
+
+.hovered-progress::-webkit-progress-value {
+  background-color: rgba(210, 210, 210, 0.4);
 }
 
 .buffered-progress.buffering {
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(210,210,210,0.6) 0,
-    rgba(210,210,210,0.6) 10px,
-    rgba(180,180,180,0.6) 10px,
-    rgba(180,180,180,0.6) 20px
-  );
+  background-image: repeating-linear-gradient(45deg,
+      rgba(210, 210, 210, 0.6) 0,
+      rgba(210, 210, 210, 0.6) 10px,
+      rgba(180, 180, 180, 0.6) 10px,
+      rgba(180, 180, 180, 0.6) 20px);
   animation: zebraMove 1s linear infinite;
   will-change: background-position;
-  
-  
 }
 
 @keyframes zebraMove {
   0% {
     background-position: 0 0;
   }
+
   100% {
     background-position: 60px 0;
   }
@@ -93,7 +107,8 @@
   border-radius: 50%;
   background: #fafafa;
   cursor: pointer;
-  margin-top: -4.5px; /* center thumb */
+  margin-top: -4.5px;
+  /* center thumb */
   transition: box-shadow 0.2s ease;
   position: relative;
   z-index: 2;

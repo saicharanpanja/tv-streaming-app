@@ -17,12 +17,13 @@ export default function Settings({
   qualities,
   selected,
   setSelected,
-  autoHeight
+  autoHeight,
+  currentSrc
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenuTab, setActiveMenuTab] = useState("none");
 
-  // Get the saved speed.
+  // States for Speed
   const [playbackRate, setPlaybackRate] = useState(() => {
     const saved = localStorage.getItem("player:playbackRate");
     const n = parseFloat(saved);
@@ -37,42 +38,39 @@ export default function Settings({
     [playbackRate]
   );
 
-  // Apply the saved speed whenever changes.
+  // Apply the speed whenever changes.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    function applyInitialRate() {
+    const applyRate = () => {
       try {
         video.playbackRate = playbackRate;
-        if ("preservesPitch" in video) video.preservesPitch = true;
-        else if ("mozPreservesPitch" in video) video.mozPreservesPitch = true;
-        else if ("webkitPreservesPitch" in video) video.webkitPreservesPitch = true;
+        if ("preservesPitch" in video) {
+          video.preservesPitch = true;
+        } else if ("mozPreservesPitch" in video) {
+          video.mozPreservesPitch = true;
+        }
       } catch (err) {
-        console.warn("[Player] Failed to apply playback rate:", playbackRate, err);
+        console.warn("[Player] Failed to apply playback rate:", err);
       }
-    }
+    };
 
-    if (Hls.isSupported() || video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.addEventListener("loadedmetadata", applyInitialRate);
-      return () => {
-        video.removeEventListener("loadedmetadata", applyInitialRate);
-      };
-    }
-  }, [playbackRate, videoRef]);
+    applyRate();
+    video.addEventListener('loadedmetadata', applyRate);
+    return () => {
+      video.removeEventListener('loadedmetadata', applyRate);
+    };
+  }, [playbackRate, videoRef, currentSrc]);
 
-  // Set the speed whenever changes.
+  // Save the speed whenever changes.
   useEffect(() => {
     try {
       localStorage.setItem("player:playbackRate", playbackRate.toString());
-      const video = videoRef.current;
-      if (video && video.playbackRate !== playbackRate) {
-        video.playbackRate = playbackRate;
-      }
     } catch (err) {
-      console.error("[Player] Could not save or apply playback rate:", playbackRate, err);
+      console.error("[Player] Could not save playback rate:", playbackRate, err);
     }
-  }, [playbackRate, videoRef]);
+  }, [playbackRate]);
 
   return (
     <div className="video-controls settings-container">
@@ -87,9 +85,9 @@ export default function Settings({
 
       <span
         className={`settings-icon-quality-label-${((selected > 1440 && selected <= 2160) || (selected === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4k" :
-            ((selected >= 720 && selected <= 1440) || (selected === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "hd" :
-              ((selected >= 480 && selected < 720) || (selected === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "sd" :
-                ""
+          ((selected >= 720 && selected <= 1440) || (selected === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "hd" :
+            ((selected >= 480 && selected < 720) || (selected === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "sd" :
+              ""
           }`}
       >{
           ((selected > 1440 && selected <= 2160) || (selected === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4K" :
@@ -106,6 +104,7 @@ export default function Settings({
         speedLabel={speedLabel}
         captionsLabel={captionsLabel}
         qualityLabel={selected}
+        tracks={tracks}
       />
 
       <QualityMenu
@@ -128,7 +127,7 @@ export default function Settings({
         setPlaybackRate={setPlaybackRate}
       />
 
-      <CaptionsMenu
+      {tracks.length !== 0 && <CaptionsMenu
         activeMenuTab={activeMenuTab}
         setActiveMenuTab={setActiveMenuTab}
         isMenuOpen={isMenuOpen}
@@ -136,7 +135,7 @@ export default function Settings({
         captionsLabel={captionsLabel}
         setCaptionsLabel={setCaptionsLabel}
         tracks={tracks}
-      />
+      />}
     </div>
   );
 }

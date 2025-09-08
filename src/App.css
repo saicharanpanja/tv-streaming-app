@@ -11,6 +11,11 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'captions';
+  src: url('/captions.woff2') format('woff2');
+}
+
 html,
 body {
   font-family: "OpenSans", sans-serif;

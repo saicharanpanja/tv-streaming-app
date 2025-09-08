@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function PlayPause({ videoRef }) {
+export default function PlayPause({ videoRef, currentSrc }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [overlayData, setOverlayData] = useState(null);
 
-  // Track video play/pause state and clean up listeners
+  // Sync video play/pause state and clean up.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -22,7 +22,7 @@ export default function PlayPause({ videoRef }) {
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onPause);
     };
-  }, [videoRef]);
+  }, [videoRef, currentSrc]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
@@ -69,7 +69,7 @@ export default function PlayPause({ videoRef }) {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
     };
-  }, [togglePlay, videoRef]);
+  }, [togglePlay, videoRef, currentSrc]);
 
   return (
     <button className="video-controls play-pause-container" onClick={togglePlay}>
