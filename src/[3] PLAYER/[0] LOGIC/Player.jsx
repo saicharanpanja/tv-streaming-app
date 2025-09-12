@@ -88,6 +88,7 @@ function Player({
     if (!video || !currentSrc) return;
 
     setQualities([]);
+    setCaptionsText('');
 
     // Function to get the available Subtitles by filtering.
     function applyTracks() {

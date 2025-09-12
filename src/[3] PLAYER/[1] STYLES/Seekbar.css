@@ -1,133 +1,147 @@
 .seekbar-container {
   position: relative;
+  padding: 0 12px;
+  height: 20px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 10px;
+  cursor: pointer;
   pointer-events: auto;
 }
 
-/* SEEKBAR STYLES */
-.video-controls-inputs.seekbar {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-  z-index: 3;
-}
-
-.video-controls-inputs.seekbar::-webkit-slider-runnable-track {
-  height: 4px;
-  background: transparent;
-}
-
-.video-controls-inputs.seekbar::-moz-range-track {
-  height: 4px;
-  background: transparent;
-}
-
-/* BUFFER PROGRESS STYLES */
-.buffered-progress,
-.hovered-progress {
+.seekbar-track-wrapper {
   position: absolute;
-  height: 4px;
-  width: auto;
   left: 12px;
   right: 12px;
-  -webkit-appearance: none;
-  appearance: none;
-
-  z-index: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
   pointer-events: none;
 }
 
-.hovered-progress {
+/* Common base styles for all visual track/progress elements */
+.seekbar-track,
+.buffer-progress,
+.play-progress-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+}
+
+/* 1. Base track style (bottom layer) */
+.seekbar-track {
+  border-radius: 4px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.15);
   z-index: 1;
-  transition: all 0.15s ease-in-out;
 }
 
-.buffered-progress::-webkit-progress-bar {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  transition: all 0.5s ease-in-out;
+/* 2. Buffer progress */
+.buffer-progress {
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  z-index: 2;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.buffered-progress::-webkit-progress-value {
-  background-color: rgba(210, 210, 210, 0.6);
-  transition: all 0.25s ease-in-out;
-  mix-blend-mode: difference;
+/* 3. Play progress */
+.play-progress-fill {
+  border-radius: 4px;
+  background-color: rgb(47, 125, 72);
+  z-index: 4;
 }
 
-/* During Hover*/
-.buffered-progress.hovering::-webkit-progress-bar {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.buffered-progress.hovering::-webkit-progress-value {
-  background-color: rgba(210, 210, 210, 0.475);
-}
-
-.hovered-progress::-webkit-progress-bar {
-  height: 4px;
-  background: transparent;
-  transition: none;
-}
-
-.hovered-progress::-webkit-progress-value {
-  background-color: rgba(210, 210, 210, 0.4);
-}
-
-.buffered-progress.buffering {
-  background-image: repeating-linear-gradient(45deg,
-      rgba(210, 210, 210, 0.6) 0,
-      rgba(210, 210, 210, 0.6) 10px,
-      rgba(180, 180, 180, 0.6) 10px,
-      rgba(180, 180, 180, 0.6) 20px);
-  animation: zebraMove 1s linear infinite;
-  will-change: background-position;
-}
-
-@keyframes zebraMove {
-  0% {
-    background-position: 0 0;
-  }
-
-  100% {
-    background-position: 60px 0;
-  }
-}
-
-/* THUMB STYLES */
-.video-controls-inputs.seekbar::-webkit-slider-thumb {
+/* The actual <input> element - invisible but on top for interaction */
+.play-progress-input {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  width: calc(100% - 24px);
+  top: 0;
+  height: 100%;
+  margin: 0;
+  z-index: 10;
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #fafafa;
-  cursor: pointer;
-  margin-top: -4.5px;
-  /* center thumb */
-  transition: box-shadow 0.2s ease;
-  position: relative;
-  z-index: 2;
-}
-
-.video-controls-inputs.seekbar:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
-}
-
-.video-controls-inputs.seekbar::-moz-range-thumb {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #fafafa;
-  cursor: pointer;
-  transition: box-shadow 0.2s ease;
+  background: transparent;
   border: none;
 }
 
-.video-controls-inputs.seekbar:active::-moz-range-thumb {
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+/* Hide the default browser thumb*/
+.play-progress-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+/* Styles for custom thumb element */
+.progress-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 12px;
+  height: 12px;
+  background-color: #fafafa;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 5;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Show the thumb when hovering the main container */
+.seekbar-container:hover .progress-thumb {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Add shadow effect when input is active (being dragged) */
+.play-progress-input:active ~ .seekbar-track-wrapper .progress-thumb {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Buffering Animation - applied to the base track */
+.seekbar-container.buffering .seekbar-track {
+  background-image: repeating-linear-gradient(
+    60deg,
+    rgba(240, 240, 240, 0.4) 0,
+    rgba(240, 240, 240, 0.4) 10px,
+    rgba(150, 150, 150, 0.4) 10px,
+    rgba(150, 150, 150, 0.4) 20px
+  );
+  background-size: 20px 20px;
+  animation: zebraMove 0.6s linear infinite;
+}
+
+@keyframes zebraMove {
+  from { background-position: 0 0; }
+  to { background-position: 20px 0; }
+}
+
+/* Hover Line and Tooltip Styles */
+.hover-line {
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  width: 2px;
+  background-color: rgba(255, 255, 255, 0.8);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.hover-tooltip {
+  position: absolute;
+  bottom: 25px;
+  background-color: rgba(20, 20, 20, 0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+  user-select: none;
 }

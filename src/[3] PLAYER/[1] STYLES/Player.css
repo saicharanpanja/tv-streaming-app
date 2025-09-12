@@ -31,7 +31,6 @@
   bottom: 0;
   left: 0;
   right: 0;
-  width: auto;
 
   background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
   border-bottom-left-radius: 12px;
@@ -54,7 +53,7 @@
   align-items: center;
   justify-content: center;
   display: flex;
-  padding: 6px 15px 10px 15px;
+  padding: 0px 15px 10px 15px;
   gap: 10px;
 }
 
@@ -212,12 +211,13 @@
   display: inline;
   line-height: 1.5; 
   white-space: pre-wrap;
-  font-family: "captions";
+  font-family: "Gordita-Medium", "Roboto", sans-serif;
   font-size: clamp(14px, 2cqw, 22px);
 
   color: white;
   padding: 1.8px 10px; 
   border-radius: 4px;
+  user-select: none;
   box-decoration-break: clone;
   background-color: rgba(0, 0, 0, 0.8);
 }

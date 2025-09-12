@@ -5,20 +5,22 @@
 }
 
 @font-face {
-  font-family: 'OpenSans';
-  src: url('/OpenSans.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+  font-family: 'Gordita-Medium';
+  font-display: swap;
+  src: url('/Gordita-Medium.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'captions';
-  src: url('/captions.woff2') format('woff2');
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/Inter.woff2') format('woff2');
 }
 
 html,
 body {
-  font-family: "OpenSans", sans-serif;
+  font-family: "Inter", "Roboto", sans-serif;
   font-size: small;
   margin: 0;
   padding: 0;
