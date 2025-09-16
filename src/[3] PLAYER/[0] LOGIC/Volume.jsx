@@ -2,7 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function Volume({ videoRef, currentSrc }) {
+export default function Volume({
+  videoRef,
+  currentSrc,
+  containerRef,
+  shouldIgnoreKeyPress
+}) {
   const [volume, setVolume] = useState(0.75);
   const [isMuted, setIsMuted] = useState(false);
   const [overlayData, setOverlayData] = useState(null);
@@ -46,49 +51,56 @@ export default function Volume({ videoRef, currentSrc }) {
   // Keydown effect for '↑','↓','M' key.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    const container = containerRef.current;
+    if (!video || !container) return;
 
     let timer;
 
-    function handleKeyDown(event) {
-      const { tagName } = event.target;
-      if (tagName === "INPUT" || tagName === "TEXTAREA") {
-        return;
-      }
+    const showOverlay = (iconName) => {
+      setOverlayData({ name: iconName, id: Date.now() });
+      clearTimeout(timer);
+      timer = setTimeout(() => setOverlayData(null), 500);
+    };
 
-      let iconName = null;
-
+    const handleGlobalShortcuts = (event) => {
+      if (shouldIgnoreKeyPress(event)) return;
       if (event.code === "KeyM") {
-        iconName = video.muted ? "volume-up" : "volume-off";
         toggleMute();
-      } else if (event.code === "ArrowUp") {
-        event.preventDefault();
-        const newVolUp = Math.min(1, video.volume + 0.25);
-        video.volume = newVolUp;
-        video.muted = false;
-        iconName = "volume-up";
-      } else if (event.code === "ArrowDown") {
-        event.preventDefault();
-        const newVolDown = Math.max(0, video.volume - 0.25);
-        video.volume = newVolDown;
-        iconName = newVolDown === 0 ? "volume-off" : "volume-down";
-      } else {
-        return;
+        showOverlay(video.muted ? "volume-off" : "volume-up");
       }
+    };
 
-      if (iconName) {
-        setOverlayData({ name: iconName, id: Date.now() });
-        clearTimeout(timer);
-        timer = setTimeout(() => setOverlayData(null), 500);
+    const handlePlayerShortcuts = (event) => {
+      if (shouldIgnoreKeyPress(event, { allowRepeat: true, allowRange: false })) return;
+
+      switch (event.code) {
+        case "ArrowUp": {
+          event.preventDefault();
+          const newVolume = Math.min(1, video.volume + 0.25);
+          video.volume = newVolume;
+          video.muted = false;
+          showOverlay("volume-up");
+          return;
+        }
+        case "ArrowDown": {
+          event.preventDefault();
+          const newVolume = Math.max(0, video.volume - 0.25);
+          video.volume = newVolume;
+          video.muted = newVolume === 0;
+          showOverlay(newVolume === 0 ? "volume-off" : "volume-down");
+          return;
+        }
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleGlobalShortcuts);
+    container.addEventListener("keydown", handlePlayerShortcuts);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleGlobalShortcuts);
+      container.removeEventListener("keydown", handlePlayerShortcuts);
       clearTimeout(timer);
     };
-  }, [toggleMute, videoRef, currentSrc]);
+  }, [videoRef, containerRef, currentSrc, toggleMute, shouldIgnoreKeyPress]);
 
   return (
     <div className="video-controls volume-container">

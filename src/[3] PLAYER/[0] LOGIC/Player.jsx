@@ -7,7 +7,7 @@ import PlayPause from "./PlayPause";
 import SkipNext from "./SkipNext";
 import Volume from "./Volume";
 import Captions from "./Captions";
-import MusicMode from "./MusicMode";
+import AudioMode from "./AudioMode";
 import Settings from "./Settings/Settings";
 import Fullscreen from "./Fullscreen";
 import IconSprite from "../[2] UTILS/IconSprite";
@@ -241,9 +241,23 @@ function Player({
     }
   };
 
+  //Gatekeeper for Keydown Effects.
+  const shouldIgnoreKeyPress = (event, options = {}) => {
+    const { allowRange = true, allowRepeat = false, allowShift = false } = options;
+    const { target, ctrlKey, altKey, metaKey, shiftKey, repeat } = event;
+    if (ctrlKey || altKey || metaKey) return true;
+    if (!allowShift && shiftKey) return true;
+    if (target.tagName === 'INPUT') return !(allowRange && target.type === 'range');
+    if (target.tagName === 'TEXTAREA' || target.isContentEditable) return true;
+    if (repeat && !allowRepeat) return true;
+    return false;
+  };
+
   return (
     <div
       ref={containerRef}
+      tabIndex="-1"
+      style={{ outline: 'none' }}
       className={`player-container${controlsVisible ? " controls-visible" : " hide-cursor"}`}
       onMouseLeave={() => !isPaused && (clearTimeout(hideControlsTimeout.current), setControlsVisible(false))}
       onMouseMove={() => {
@@ -275,13 +289,42 @@ function Player({
         onMouseEnter={() => isHoveringControlsRef.current = true}
         onMouseLeave={() => isHoveringControlsRef.current = false}
       >
-        <Seekbar videoRef={videoRef} currentSrc={currentSrc} />
+        <Seekbar
+          videoRef={videoRef}
+          currentSrc={currentSrc}
+          containerRef={containerRef}
+          shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+        />
 
         <div className="video-controls-container-bottom">
-          <SkipPrev onPrev={handlePrev} isDisabled={!hasPrev} />
-          <PlayPause videoRef={videoRef} currentSrc={currentSrc} />
-          <SkipNext onNext={handleNext} isDisabled={!hasNext} />
-          <Volume videoRef={videoRef} currentSrc={currentSrc} />
+          {sourcesArray.length > 1 &&
+            <SkipPrev
+              onPrev={handlePrev}
+              isDisabled={!hasPrev}
+              shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+            />
+          }
+
+          <PlayPause
+            videoRef={videoRef}
+            currentSrc={currentSrc}
+            shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+          />
+
+          {sourcesArray.length > 1 &&
+            <SkipNext
+              onNext={handleNext}
+              isDisabled={!hasNext}
+              shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+            />
+          }
+
+          <Volume
+            videoRef={videoRef}
+            currentSrc={currentSrc}
+            containerRef={containerRef}
+            shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+          />
 
           <div className="spacer"></div>
 
@@ -290,10 +333,11 @@ function Player({
               captionsLabel={captionsLabel}
               setCaptionsLabel={setCaptionsLabel}
               tracks={tracks}
+              shouldIgnoreKeyPress={shouldIgnoreKeyPress}
             />
           }
 
-          <MusicMode />
+          <AudioMode />
 
           <Settings
             videoRef={videoRef}
@@ -308,7 +352,10 @@ function Player({
             currentSrc={currentSrc}
           />
 
-          <Fullscreen containerRef={containerRef} />
+          <Fullscreen
+            containerRef={containerRef}
+            shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+          />
         </div>
       </div>
     </div>

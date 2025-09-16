@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function Seekbar({ videoRef, currentSrc }) {
+export default function Seekbar({
+  videoRef,
+  currentSrc,
+  containerRef,
+  shouldIgnoreKeyPress
+}) {
   // Refs for DOM elements and state that doesn't trigger re-renders
   const isSeeking = useRef(false);
   const wasPlayingBeforeSeek = useRef(false);
@@ -81,43 +86,64 @@ export default function Seekbar({ videoRef, currentSrc }) {
     };
   }, [videoRef, currentSrc]);
 
-  // Keydown effect for '←','→','J','L' keys.
+  // Keydown effect
   useEffect(() => {
+    const video = videoRef.current;
+    const container = containerRef.current;
+    if (!video || !container) return;
+
     let timer;
+
+    //Helper function for seek and overlay.
     const seekRelative = (seconds) => {
-      const video = videoRef.current;
-      if (!video || !video.duration) return;
+      if (!video.duration) return;
       video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration));
-    };
-    const handleKeyDown = (event) => {
-      const { target, code } = event;
-      const tagName = target.tagName;
-      if ((tagName === "INPUT" && target.type !== "range") || tagName === "TEXTAREA") return;
-      const isSeekbarFocused = tagName === "INPUT" && target.type === "range";
+      const iconName = seconds > 0 ? "forward-10" : "rewind-10";
 
-      let iconName = null;
-      if ((code === "ArrowRight" || code === "KeyL") && !(isSeekbarFocused && code === "ArrowRight")) {
+      setOverlayData({ name: iconName, id: Date.now() });
+      clearTimeout(timer);
+      timer = setTimeout(() => setOverlayData(null), 500);
+    };
+
+    const handleGlobalShortcuts = (event) => {
+      const { code, key } = event;
+
+      if (code === "ArrowRight" || code === "KeyL" || code === "ArrowLeft" || code === "KeyJ") {
+        if (shouldIgnoreKeyPress(event, { allowRepeat: true, allowRange: false })) return;
         event.preventDefault();
-        seekRelative(10);
-        iconName = "forward-10";
-      } else if ((code === "ArrowLeft" || code === "KeyJ") && !(isSeekbarFocused && code === "ArrowLeft")) {
-        event.preventDefault();
-        seekRelative(-10);
-        iconName = "rewind-10";
+        (code === "ArrowRight" || code === "KeyL") ? seekRelative(10) : seekRelative(-10);
+        return;
       }
 
-      if (iconName) {
-        setOverlayData({ name: iconName, id: Date.now() });
-        clearTimeout(timer);
-        timer = setTimeout(() => setOverlayData(null), 500);
+      const digit = parseInt(key, 10);
+      if (!isNaN(digit)) {
+        if (!video.duration || shouldIgnoreKeyPress(event)) return;
+        video.currentTime = (video.duration / 100) * (digit * 10);
+        setProgress(digit * 10);
+        return;
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
+
+    const handlePlayerShortcuts = (event) => {
+      if (shouldIgnoreKeyPress(event, { allowRepeat: true })) return;
+
+      if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        if (!video.duration || event.repeat) return;
+        const isHome = event.key === 'Home';
+        video.currentTime = isHome ? 0 : video.duration;
+        setProgress(isHome ? 0 : 100);
+      }
+    };
+
+    document.addEventListener("keydown", handleGlobalShortcuts);
+    container.addEventListener("keydown", handlePlayerShortcuts);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleGlobalShortcuts);
+      container.removeEventListener("keydown", handlePlayerShortcuts);
       clearTimeout(timer);
     };
-  }, [videoRef, currentSrc]);
+  }, [videoRef, containerRef, currentSrc, shouldIgnoreKeyPress]);
 
   const handleMouseUp = () => {
     isSeeking.current = false;
@@ -223,7 +249,7 @@ export default function Seekbar({ videoRef, currentSrc }) {
         createPortal(
           <div
             key={overlayData.id}
-            className={`overlay-wrapper-${overlayData.name === "forward-10" ? "forward" : "rewind"}`}
+            className={`overlay-wrapper-${overlayData.name === "forward-10" ? "right" : "left"}`}
           >
             <Icon name={overlayData.name} size="3.5vw" color="rgba(255,255,255,0.8)" />
           </div>,

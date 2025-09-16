@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import Icon from "../[2] UTILS/Icon";
 
-export default function Fullscreen({ containerRef }) {
+export default function Fullscreen({
+  containerRef,
+  shouldIgnoreKeyPress,
+}) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Listen for fullscreen changes and update state
@@ -37,20 +40,20 @@ export default function Fullscreen({ containerRef }) {
 
   // Keydown effect for 'F' key.
   useEffect(() => {
-    function handleKeyDown(event) {
-      const { tagName } = event.target;
-      if (tagName === "INPUT" || tagName === "TEXTAREA") return;
+    const handleGlobalShortcuts = (event) => {
+      if (shouldIgnoreKeyPress(event)) return;
       if (event.code === "KeyF") toggleFullscreen();
-    }
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [toggleFullscreen]);
 
+    document.addEventListener("keydown", handleGlobalShortcuts);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalShortcuts);
+    };
+  }, [shouldIgnoreKeyPress, toggleFullscreen]);
+  
   return (
     <button className="video-controls fullscreen-container" onClick={toggleFullscreen}>
-      <Icon name={isFullscreen ? "exit-fullscreen" : "enter-fullscreen"}/>
+      <Icon name={isFullscreen ? "exit-fullscreen" : "enter-fullscreen"} />
     </button>
   );
 }

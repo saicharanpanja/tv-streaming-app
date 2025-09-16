@@ -74,7 +74,7 @@
 .video-controls-icons.exit-fullscreen,
 .video-controls-icons.volume-up,
 .video-controls-icons.volume-down,
-.video-controls-icons.music-mode-off {
+.video-controls-icons.audio-mode-off {
   position: absolute;
   left: 1;
 }
@@ -93,7 +93,6 @@
   background: transparent;
   border: none;
   pointer-events: auto;
-  cursor: pointer;
 }
 
 .video-controls.skip-previous-container,
@@ -103,11 +102,10 @@
 
 .video-controls:disabled .video-controls-icons {
   opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .video-controls.fullscreen-container,
-.video-controls.music-mode-container,
+.video-controls.audio-mode-container,
 .video-controls.captions-container,
 .video-controls.settings-container {
   position: relative;
@@ -118,7 +116,6 @@
   background: transparent;
   border: none;
   pointer-events: auto;
-  cursor: pointer;
 }
 
 .captions-underline {
@@ -163,8 +160,8 @@
   }
 }
 
-.overlay-wrapper-rewind,
-.overlay-wrapper-forward,
+.overlay-wrapper-left,
+.overlay-wrapper-right,
 .overlay-wrapper {
   position: absolute;
   top: 50%;
@@ -185,12 +182,12 @@
   animation: scaleFade 0.5s ease forwards;
 }
 
-.overlay-wrapper-forward {
+.overlay-wrapper-right {
   left: 80%;
   max-height: 34px;
 }
 
-.overlay-wrapper-rewind {
+.overlay-wrapper-left {
   left: 20%;
 }
 

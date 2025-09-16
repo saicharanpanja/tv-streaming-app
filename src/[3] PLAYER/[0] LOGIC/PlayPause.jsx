@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function PlayPause({ videoRef, currentSrc }) {
+export default function PlayPause({
+  videoRef,
+  currentSrc,
+  shouldIgnoreKeyPress,
+}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [overlayData, setOverlayData] = useState(null);
 
@@ -40,36 +44,36 @@ export default function PlayPause({ videoRef, currentSrc }) {
     const video = videoRef.current;
     if (!video) return;
 
-    let timer;
+    let overlayTimer;
 
-    function handleInteraction() {
+    const handleClick = () => {
       const iconName = video.paused || video.ended ? "play" : "pause";
       setOverlayData({ name: iconName, id: Date.now() });
-      clearTimeout(timer);
-      timer = setTimeout(() => setOverlayData(null), 500);
+      clearTimeout(overlayTimer);
+      overlayTimer = setTimeout(() => setOverlayData(null), 500);
       togglePlay();
     };
 
-    function handleKeyDown(event) {
-      const { tagName } = event.target;
-      if (tagName === "INPUT" || tagName === "TEXTAREA") {
-        return;
-      }
+    const handleGlobalShortcuts = (event) => {
+      if (shouldIgnoreKeyPress(event, { allowRepeat: true })) return;
 
-      if (event.code === "Space" || event.code === "KeyK") {
+      if (event.code === "KeyK" && !event.repeat) handleClick();
+
+      if (event.code === "Space") {
+        if (event.target.tagName === "BUTTON") return;
         event.preventDefault();
-        handleInteraction();
+        if (!event.repeat) handleClick();
       }
-    }
-
-    video.addEventListener("click", handleInteraction);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      video.removeEventListener("click", handleInteraction);
-      document.removeEventListener("keydown", handleKeyDown);
-      clearTimeout(timer);
     };
-  }, [togglePlay, videoRef, currentSrc]);
+
+    video.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleGlobalShortcuts);
+    return () => {
+      video.removeEventListener("click", handleClick);
+      document.removeEventListener("keydown", handleGlobalShortcuts);
+      clearTimeout(overlayTimer);
+    };
+  }, [videoRef, currentSrc, shouldIgnoreKeyPress, togglePlay]);
 
   return (
     <button className="video-controls play-pause-container" onClick={togglePlay}>

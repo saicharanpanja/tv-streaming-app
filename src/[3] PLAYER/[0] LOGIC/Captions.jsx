@@ -2,7 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
-export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
+export default function Captions({ 
+  captionsLabel, 
+  setCaptionsLabel, 
+  tracks,
+  shouldIgnoreKeyPress,
+}) {
   const [overlayData, setOverlayData] = useState(null);
   const areCaptionsOn = captionsLabel !== 'Disabled';
 
@@ -14,9 +19,9 @@ export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
     } else {
       const lastActive = localStorage.getItem("player:lastActiveCaption");
       const firstAvailable = tracks[0] ? (
-          { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[tracks[0].language] || tracks[0].label
+        { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[tracks[0].language] || tracks[0].label
       ) : 'Disabled';
-      
+
       setCaptionsLabel(lastActive || firstAvailable);
     }
   }, [areCaptionsOn, tracks, setCaptionsLabel]);
@@ -24,30 +29,28 @@ export default function Captions({ captionsLabel, setCaptionsLabel, tracks }) {
   // Keydown effect for 'C' key.
   useEffect(() => {
     let timer;
-    function handleKeyDown(event) {
-      const { tagName } = event.target;
-      if (tagName === "INPUT" || tagName === "TEXTAREA") return;
 
+    const handleGlobalShortcuts = (event) => {
+      if (shouldIgnoreKeyPress(event)) return;
       if (event.code === "KeyC") {
-        const iconName = "captions";
-        setOverlayData({ name: iconName, id: Date.now() });
+        setOverlayData({ name: "captions", id: Date.now() });
         clearTimeout(timer);
         timer = setTimeout(() => setOverlayData(null), 500);
         toggleCaptions();
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleGlobalShortcuts);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleGlobalShortcuts);
       clearTimeout(timer);
     };
-  }, [areCaptionsOn, toggleCaptions]);
+  }, [shouldIgnoreKeyPress, toggleCaptions]);
 
   return (
     <button className="video-controls captions-container" onClick={toggleCaptions}>
-      <Icon name="captions"/>
-      <span className={`captions-underline${areCaptionsOn ? "" : " hide"}`}/>
+      <Icon name="captions" />
+      <span className={`captions-underline${areCaptionsOn ? "" : " hide"}`} />
       {overlayData &&
         createPortal(
           <div key={overlayData.id} className="overlay-wrapper">
