@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "../[2] UTILS/Icon";
 
-function AudioMode() {
+function Audio() {
   const [isAudioMode, setIsAudioMode] = useState(false);
 
   return (
@@ -22,4 +22,4 @@ function AudioMode() {
   );
 }
 
-export default AudioMode;
+export default Audio;

@@ -7,7 +7,7 @@ import PlayPause from "./PlayPause";
 import SkipNext from "./SkipNext";
 import Volume from "./Volume";
 import Captions from "./Captions";
-import AudioMode from "./AudioMode";
+import Audio from "./Audio";
 import Settings from "./Settings/Settings";
 import Fullscreen from "./Fullscreen";
 import IconSprite from "../[2] UTILS/IconSprite";
@@ -44,19 +44,21 @@ function Player({
   const hasNext = currentIndex < sourcesArray.length - 1;
   useEffect(() => setCurrentIndex(index), [index]);
 
-  // States for Captions, Qualities.
-  const [tracks, setTracks] = useState([]);
-  const [captionsLabel, setCaptionsLabel] = useState(() => localStorage.getItem("player:captions") || 'Disabled');
+  // States for Captions, Qualities and Audio
   const [captionsText, setCaptionsText] = useState("");
+  const [captionsArray, setCaptionsArray] = useState([]);
+  const [captionsLabel, setCaptionsLabel] = useState(() => localStorage.getItem("player:captions") || 'Disabled');
 
-  const [qualities, setQualities] = useState([]);
   const [autoHeight, setAutoHeight] = useState(null);
-  const [selected, setSelected] = useState(() => {
-    const saved = localStorage.getItem("player:quality");
-    if (saved === "Auto") return "Auto";
-    const n = parseInt(saved, 10);
-    return !isNaN(n) ? n : "Auto";
-  });
+  const [qualitiesArray, setQualitiesArray] = useState([]);
+  const [qualityLabel, setQualityLabel] = useState(
+    () => (localStorage.getItem("player:quality") === "Auto"
+      ? "Auto"
+      : parseInt(localStorage.getItem("player:quality"), 10) || "Auto")
+  );
+
+  const [audiosArray, setAudiosArray] = useState([]);
+  const [audioLabel, setAudioLabel] = useState(() => localStorage.getItem("player:audio") || null);
 
   // Listen to core video events (play, pause, ended)
   useEffect(() => {
@@ -82,20 +84,21 @@ function Player({
       : hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000);
   }, [isPaused]);
 
-  // HLS Setup, Get quality heights and subtitles and teardown.
+  // HLS Setup, Get quality heights, subtitles, audio tracks and teardown.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !currentSrc) return;
 
-    setQualities([]);
-    setCaptionsText('');
+    setCaptionsArray([]);
+    setQualitiesArray([]);
+    setAudiosArray([]);
 
-    // Function to get the available Subtitles by filtering.
-    function applyTracks() {
-      const availableTracks = Array.from(video.textTracks).filter(
+    // Get the available subtitles by filtering.
+    const getCaptions = () => {
+      const uniqueCaptions = Array.from(video.textTracks).filter(
         (t) => t.kind === "subtitles" || t.kind === "captions"
       );
-      setTracks(availableTracks);
+      setCaptionsArray(uniqueCaptions);
     }
 
     if (Hls.isSupported()) {
@@ -113,11 +116,16 @@ function Player({
           }
         });
 
-        // Map new array without bitrates.
+        // Convert to new array without bitrates.
         const uniqueHeights = Array.from(map.entries())
           .map(([height, obj]) => ({ height, levelIndex: obj.levelIndex }))
           .sort((a, b) => a.height - b.height);
-        setQualities(uniqueHeights);
+        setQualitiesArray(uniqueHeights);
+      });
+
+      // Get the available audio levels.
+      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, { audioTracks }) => {
+        if (audioTracks.length > 0) setAudiosArray(audioTracks);
       });
 
       // Set the AutoHeight if quality changes.
@@ -129,32 +137,32 @@ function Player({
       hls.loadSource(currentSrc);
       hls.attachMedia(video);
       video.play().catch(() => { });
-      video.addEventListener('loadedmetadata', applyTracks);
+      video.addEventListener('loadedmetadata', getCaptions);
       return () => {
         hls.destroy();
         hlsRef.current = null;
-        video.removeEventListener('loadedmetadata', applyTracks);
+        video.removeEventListener('loadedmetadata', getCaptions);
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = currentSrc;
       video.play().catch(() => { });
-      video.addEventListener('loadedmetadata', applyTracks);
+      video.addEventListener('loadedmetadata', getCaptions);
       return () => {
-        video.removeEventListener('loadedmetadata', applyTracks);
+        video.removeEventListener('loadedmetadata', getCaptions);
       };
     }
   }, [currentSrc]);
 
-  // Apply the saved captionsLabel whenever changes.
+  // Apply the saved captions whenever changes.
   useEffect(() => {
-    if (tracks.length > 0) {
+    if (captionsArray.length > 0) {
       const getConsistentLabel = track => {
         const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
         return langMap[track.language] || track.label;
       };
 
       let trackFound = null;
-      tracks.forEach(track => {
+      captionsArray.forEach(track => {
         if (getConsistentLabel(track) === captionsLabel) {
           track.mode = 'hidden';
           trackFound = track;
@@ -177,32 +185,40 @@ function Player({
       } else setCaptionsText('');
 
       if (!trackFound && captionsLabel !== 'Disabled') {
-        setCaptionsLabel(getConsistentLabel(tracks[0]));
+        setCaptionsLabel(getConsistentLabel(captionsArray[0]));
       }
     } else setCaptionsText('');
-  }, [tracks, captionsLabel]);
+  }, [captionsArray, captionsLabel]);
 
   // Apply the saved quality whenever changes.
   useEffect(() => {
     const hls = hlsRef.current;
-    if (!hls || qualities.length === 0) return;
+    if (!hls || qualitiesArray.length === 0) return;
 
-    const preferredQualityAvailable = qualities.some(q => q.height === selected);
+    const match = qualitiesArray.find(q => q.height === qualityLabel);
 
-    if (selected !== "Auto" && preferredQualityAvailable) {
-      const match = qualities.find(q => q.height === selected);
-      if (match && hls.currentLevel !== match.levelIndex) {
-        hls.currentLevel = match.levelIndex;
-      }
+    if (qualityLabel !== "Auto" && match) {
+      hls.currentLevel !== match.levelIndex && (hls.currentLevel = match.levelIndex);
     } else {
-      if (hls.currentLevel !== -1) {
-        hls.currentLevel = -1;
-      }
-      if (selected !== "Auto" && !preferredQualityAvailable) {
-        setSelected("Auto");
-      }
+      hls.currentLevel !== -1 && (hls.currentLevel = -1);
+      qualityLabel !== "Auto" && (setQualityLabel("Auto"));
     }
-  }, [qualities, selected]);
+  }, [qualitiesArray, qualityLabel]);
+
+  // Apply the saved audio whenever changes.
+  useEffect(() => {
+    const hls = hlsRef.current;
+    if (!hls || audiosArray.length === 0) return;
+
+    const match = audiosArray.find(t => t.name === audioLabel);
+
+    if (audioLabel && match) {
+      hls.audioTrack !== match.id && (hls.audioTrack = match.id);
+    } else {
+      hls.audioTrack = -1;
+      setAudioLabel(audiosArray[hls.audioTrack].name);
+    }
+  }, [audiosArray, audioLabel]);
 
   // Save the captionsLabel whenever changes.
   useEffect(() => {
@@ -219,11 +235,20 @@ function Player({
   // Save the qualityLabel whenever changes.
   useEffect(() => {
     try {
-      localStorage.setItem("player:quality", selected.toString());
+      localStorage.setItem("player:quality", qualityLabel.toString());
     } catch (err) {
-      console.error("[Player] Could not save quality:", selected, err);
+      console.error("[Player] Could not save quality:", err);
     }
-  }, [selected]);
+  }, [qualityLabel]);
+
+  // Save the audioLabel whenever it changes.
+  useEffect(() => {
+    try {
+      localStorage.setItem("player:audio", audioLabel);
+    } catch (err) {
+      console.error("[Player] Could not save audio state:", err);
+    }
+  }, [audioLabel]);
 
   const handlePrev = () => {
     if (hasPrev) {
@@ -328,28 +353,34 @@ function Player({
 
           <div className="spacer"></div>
 
-          {tracks.length !== 0 &&
+          {captionsArray.length !== 0 &&
             <Captions
               captionsLabel={captionsLabel}
               setCaptionsLabel={setCaptionsLabel}
-              tracks={tracks}
+              captionsArray={captionsArray}
               shouldIgnoreKeyPress={shouldIgnoreKeyPress}
             />
           }
 
-          <AudioMode />
+          {audiosArray.length !== 0 && <Audio />}
 
           <Settings
+            hlsRef={hlsRef}
             videoRef={videoRef}
+            currentSrc={currentSrc}
+
+            captionsArray={captionsArray}
             captionsLabel={captionsLabel}
             setCaptionsLabel={setCaptionsLabel}
-            tracks={tracks}
-            hlsRef={hlsRef}
-            qualities={qualities}
-            selected={selected}
-            setSelected={setSelected}
+
+            qualitiesArray={qualitiesArray}
             autoHeight={autoHeight}
-            currentSrc={currentSrc}
+            qualityLabel={qualityLabel}
+            setQualityLabel={setQualityLabel}
+
+            audiosArray={audiosArray}
+            audioLabel={audioLabel}
+            setAudioLabel={setAudioLabel}
           />
 
           <Fullscreen

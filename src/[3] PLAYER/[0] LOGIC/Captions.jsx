@@ -5,26 +5,26 @@ import Icon from "../[2] UTILS/Icon";
 export default function Captions({ 
   captionsLabel, 
   setCaptionsLabel, 
-  tracks,
+  captionsArray,
   shouldIgnoreKeyPress,
 }) {
   const [overlayData, setOverlayData] = useState(null);
   const areCaptionsOn = captionsLabel !== 'Disabled';
 
   const toggleCaptions = useCallback(() => {
-    if (tracks.length === 0) return;
+    if (captionsArray.length === 0) return;
 
     if (areCaptionsOn) {
       setCaptionsLabel('Disabled');
     } else {
       const lastActive = localStorage.getItem("player:lastActiveCaption");
-      const firstAvailable = tracks[0] ? (
-        { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[tracks[0].language] || tracks[0].label
+      const firstAvailable = captionsArray[0] ? (
+        { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[captionsArray[0].language] || captionsArray[0].label
       ) : 'Disabled';
 
       setCaptionsLabel(lastActive || firstAvailable);
     }
-  }, [areCaptionsOn, tracks, setCaptionsLabel]);
+  }, [areCaptionsOn, captionsArray, setCaptionsLabel]);
 
   // Keydown effect for 'C' key.
   useEffect(() => {

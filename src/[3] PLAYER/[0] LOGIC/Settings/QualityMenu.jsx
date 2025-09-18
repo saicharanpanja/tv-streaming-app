@@ -1,27 +1,17 @@
 import { CaretLeftIcon } from '@phosphor-icons/react';
 
 export default function QualityMenu({
+  isMenuOpen,
   activeMenuTab,
   setActiveMenuTab,
-  isMenuOpen,
-  hlsRef,
-  qualities,
-  selected,
-  setSelected,
-  autoHeight
-}) {
-  function setAuto() {
-    const hls = hlsRef.current;
-    setSelected("Auto");
-    if (hls) hls.currentLevel = -1;
-    setActiveMenuTab("main");
-  };
 
-  function setHeight(height) {
-    const hls = hlsRef.current;
-    setSelected(height);
-    const match = qualities.find((q) => q.height === height);
-    if (hls && match) hls.currentLevel = match.levelIndex;
+  qualitiesArray,
+  qualityLabel,
+  setQualityLabel,
+  autoHeight,
+}) {
+  function handleSelect(label) {
+    setQualityLabel(label);
     setActiveMenuTab("main");
   };
 
@@ -42,37 +32,35 @@ export default function QualityMenu({
 
       {/* --- Auto Option --- */}
       <div
-        onClick={() => setAuto()}
+        onClick={() => handleSelect("Auto")}
         className="settings-menu quality-item"
       >
-        <span className={`settings-menu quality-item-radio${selected === 'Auto' ? ' selected' : ''}`} />
-        <span>{selected === "Auto" ? `Auto (${autoHeight}p)` : "Auto"}</span>
+        <span className={`settings-menu quality-item-radio${qualityLabel === 'Auto' ? ' selected' : ''}`} />
+        <span>{qualityLabel === "Auto" ? `Auto (${autoHeight}p)` : "Auto"}</span>
       </div>
 
-      {qualities.map((q) => {
+      {qualitiesArray.map((q) => {
         const h = q.height;
-        const label = `${h}p`;
         return (
           <div
             key={h}
-            onClick={() => setHeight(h)}
+            onClick={() => handleSelect(h)}
             className="settings-menu quality-item"
           >
-            <span className={`settings-menu quality-item-radio${selected === h ? " selected" : ""}`} />
-            <span className="option-label">{label}</span>
+            <span className={`settings-menu quality-item-radio${qualityLabel === h ? " selected" : ""}`} />
+            <span className="option-label">{`${h}p`}</span>
             <span
-              className={`settings-menu${
-                (h> 1440 && h<=2160) ? " quality-item-label-4k" :
-                (h>= 720 && h<=1440) ? " quality-item-label-hd" :
-                (h>= 480 && h<720) ? " quality-item-label-sd" :
-                ""
-              }`}
+              className={`settings-menu${(h > 1440 && h <= 2160) ? " quality-item-label-4k" :
+                  (h >= 720 && h <= 1440) ? " quality-item-label-hd" :
+                    (h >= 480 && h < 720) ? " quality-item-label-sd" :
+                      ""
+                }`}
             >{
-              (h> 1440 && h<=2160) ? "4K" :
-              (h>= 720 && h<=1440) ? "HD" :
-              (h>= 480 && h<720) ? "SD" :
-              ""
-            }
+                (h > 1440 && h <= 2160) ? "4K" :
+                  (h >= 720 && h <= 1440) ? "HD" :
+                    (h >= 480 && h < 720) ? "SD" :
+                      ""
+              }
             </span>
           </div>
         );

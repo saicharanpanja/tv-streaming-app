@@ -6,14 +6,15 @@ const getConsistentLabel = (track) => captionsLangLabel[track.language] || track
 const captionsLangTag = { de: 'DE', deu: 'DE', ger: 'DE' };
 
 export default function CaptionsMenu({
+  isMenuOpen,
   activeMenuTab,
   setActiveMenuTab,
+
+  captionsArray,
   captionsLabel,
   setCaptionsLabel,
-  isMenuOpen,
-  tracks
 }) {
-  const handleSelect = (label) => {
+  function handleSelect(label) {
     setCaptionsLabel(label);
     setActiveMenuTab('main');
   };
@@ -42,7 +43,7 @@ export default function CaptionsMenu({
       </div>
 
       {/* --- Map over available tracks --- */}
-      {tracks.map((track) => {
+      {captionsArray.map((track) => {
         const consistentLabel = getConsistentLabel(track);
         return (
           <div

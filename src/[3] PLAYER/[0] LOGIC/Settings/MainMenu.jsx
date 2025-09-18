@@ -1,18 +1,35 @@
 import { CaretRightIcon } from '@phosphor-icons/react';
 
 export default function MainMenu({
-  setActiveMenuTab,
   activeMenuTab,
-  speedLabel,
+  setActiveMenuTab,
+
+  audiosArray,
+  audioLabel,
+  captionsArray,
   captionsLabel,
   qualityLabel,
-  tracks
+  speedLabel,
 }) {
   return (
     <div
       className={`settings-menu main${activeMenuTab === "main" ? "" : " hide"}`}
     >
-      {tracks.length !== 0 &&
+      {/*Audio*/}
+      {audiosArray.length !== 0 && <div
+        className="settings-menu main-item"
+        onClick={() => setActiveMenuTab("audio")}
+        onKeyDown={(e) => e.key === "Enter" && setActiveMenuTab("audio")}
+      >
+        <span>Audio</span>
+        <span className="spacer"></span>
+        <span>{audioLabel}</span>
+        <CaretRightIcon size={10} style={{ marginLeft: "-6px" }} />
+      </div>
+      }
+
+      {/*Captions*/}
+      {captionsArray.length !== 0 &&
         <div
           className="settings-menu main-item"
           onClick={() => setActiveMenuTab("captions")}
@@ -25,6 +42,8 @@ export default function MainMenu({
         </div>
       }
 
+
+      {/*Quality*/}
       <div
         className="settings-menu main-item"
         onClick={() => setActiveMenuTab("quality")}
@@ -36,6 +55,8 @@ export default function MainMenu({
         <CaretRightIcon size={10} style={{ marginLeft: "-6px" }} />
       </div>
 
+
+      {/*Speed*/}
       <div
         className="settings-menu main-item"
         onClick={() => setActiveMenuTab("speed")}

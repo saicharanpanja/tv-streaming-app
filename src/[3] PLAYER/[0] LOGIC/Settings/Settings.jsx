@@ -1,24 +1,30 @@
 import { useState, useMemo, useEffect } from "react";
-import Hls from "hls.js";
 
 import MainMenu from "./MainMenu";
-import SpeedMenu from "./SpeedMenu";
+import AudioMenu from './AudioMenu';
 import CaptionsMenu from "./CaptionsMenu";
 import QualityMenu from "./QualityMenu";
+import SpeedMenu from "./SpeedMenu";
 
 import Icon from "../../[2] UTILS/Icon";
 
 export default function Settings({
   videoRef,
+  hlsRef,
+  currentSrc,
+
+  captionsArray,
   captionsLabel,
   setCaptionsLabel,
-  tracks,
-  hlsRef,
-  qualities,
-  selected,
-  setSelected,
+
+  qualitiesArray,
   autoHeight,
-  currentSrc
+  qualityLabel,
+  setQualityLabel,
+
+  audiosArray,
+  audioLabel,
+  setAudioLabel,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenuTab, setActiveMenuTab] = useState("none");
@@ -29,14 +35,6 @@ export default function Settings({
     const n = parseFloat(saved);
     return !isNaN(n) ? n : 1;
   });
-
-  // Get a speed Label
-  const speedLabel = useMemo(
-    () => (playbackRate === 1
-      ? "Normal"
-      : `${playbackRate.toFixed(2).replace(/\.00$/, "")}×`),
-    [playbackRate]
-  );
 
   // Apply the speed whenever changes.
   useEffect(() => {
@@ -72,6 +70,14 @@ export default function Settings({
     }
   }, [playbackRate]);
 
+  // Get a speed Label
+  const speedLabel = useMemo(
+    () => (playbackRate === 1
+      ? "Normal"
+      : `${playbackRate.toFixed(2).replace(/\.00$/, "")}×`),
+    [playbackRate]
+  );
+
   return (
     <div className="video-controls settings-container">
       <Icon
@@ -84,15 +90,15 @@ export default function Settings({
       />
 
       <span
-        className={`settings-icon-quality-label-${((selected > 1440 && selected <= 2160) || (selected === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4k" :
-          ((selected >= 720 && selected <= 1440) || (selected === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "hd" :
-            ((selected >= 480 && selected < 720) || (selected === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "sd" :
+        className={`settings-icon-quality-label-${((qualityLabel > 1440 && qualityLabel <= 2160) || (qualityLabel === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4k" :
+          ((qualityLabel >= 720 && qualityLabel <= 1440) || (qualityLabel === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "hd" :
+            ((qualityLabel >= 480 && qualityLabel < 720) || (qualityLabel === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "sd" :
               ""
           }`}
       >{
-          ((selected > 1440 && selected <= 2160) || (selected === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4K" :
-            ((selected >= 720 && selected <= 1440) || (selected === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "HD" :
-              ((selected >= 480 && selected < 720) || (selected === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "SD" :
+          ((qualityLabel > 1440 && qualityLabel <= 2160) || (qualityLabel === "Auto" && (autoHeight > 1440 && autoHeight <= 2160))) ? "4K" :
+            ((qualityLabel >= 720 && qualityLabel <= 1440) || (qualityLabel === "Auto" && (autoHeight >= 720 && autoHeight <= 1440))) ? "HD" :
+              ((qualityLabel >= 480 && qualityLabel < 720) || (qualityLabel === "Auto" && (autoHeight >= 480 && autoHeight < 720))) ? "SD" :
                 ""
         }
       </span>
@@ -101,21 +107,35 @@ export default function Settings({
         activeMenuTab={activeMenuTab}
         setActiveMenuTab={setActiveMenuTab}
 
-        speedLabel={speedLabel}
+        audiosArray={audiosArray}
+        audioLabel={audioLabel}
+
+        captionsArray={captionsArray}
         captionsLabel={captionsLabel}
-        qualityLabel={selected}
-        tracks={tracks}
+        
+        qualityLabel={qualityLabel}
+        speedLabel={speedLabel}
       />
 
-      <QualityMenu
+      {audiosArray.length !== 0 && <AudioMenu
+        isMenuOpen={isMenuOpen}
         activeMenuTab={activeMenuTab}
         setActiveMenuTab={setActiveMenuTab}
+
+        audiosArray={audiosArray}
+        audioLabel={audioLabel}
+        setAudioLabel={setAudioLabel}
+      />}
+
+      <QualityMenu
         isMenuOpen={isMenuOpen}
+        activeMenuTab={activeMenuTab}
+        setActiveMenuTab={setActiveMenuTab}
 
         hlsRef={hlsRef}
-        qualities={qualities}
-        selected={selected}
-        setSelected={setSelected}
+        qualitiesArray={qualitiesArray}
+        qualityLabel={qualityLabel}
+        setQualityLabel={setQualityLabel}
         autoHeight={autoHeight}
       />
 
@@ -127,14 +147,14 @@ export default function Settings({
         setPlaybackRate={setPlaybackRate}
       />
 
-      {tracks.length !== 0 && <CaptionsMenu
+      {captionsArray.length !== 0 && <CaptionsMenu
         activeMenuTab={activeMenuTab}
         setActiveMenuTab={setActiveMenuTab}
         isMenuOpen={isMenuOpen}
 
+        captionsArray={captionsArray}
         captionsLabel={captionsLabel}
         setCaptionsLabel={setCaptionsLabel}
-        tracks={tracks}
       />}
     </div>
   );

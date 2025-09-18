@@ -47,7 +47,8 @@
 .settings-menu.main,
 .settings-menu.captions,
 .settings-menu.quality,
-.settings-menu.speed   {
+.settings-menu.speed,
+.settings-menu.audio {
   font-size: 13.5px;
 
   background-color: rgba(255,255,255,0.95);
@@ -73,7 +74,8 @@
 
 .settings-menu.captions,
 .settings-menu.quality,
-.settings-menu.speed  {
+.settings-menu.speed,
+.settings-menu.audio  {
   padding: 5px;
 }
 
@@ -85,7 +87,8 @@
 
 .settings-menu.captions.hide,
 .settings-menu.quality.hide,
-.settings-menu.speed.hide {
+.settings-menu.speed.hide,
+.settings-menu.audio.hide {
   opacity: 0;
   visibility: hidden;
   transform: translateX(calc(-20px)) translateY(0);
@@ -94,7 +97,8 @@
 .settings-menu.main-item,
 .settings-menu.captions-item,
 .settings-menu.quality-item,
-.settings-menu.speed-item   {
+.settings-menu.speed-item,
+.settings-menu.audio-item   {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -112,7 +116,8 @@
 
 .settings-menu.captions-item,
 .settings-menu.quality-item,
-.settings-menu.speed-item  {
+.settings-menu.speed-item,
+.settings-menu.audio-item  {
   position: relative;
   gap: 12.5px;
   padding: 7px 35px 7px 10px;
@@ -129,14 +134,16 @@
 .settings-menu.main-item:hover,
 .settings-menu.captions-item:hover,
 .settings-menu.quality-item:hover,
-.settings-menu.speed-item:hover {
+.settings-menu.speed-item:hover,
+.settings-menu.audio-item:hover {
   background-color: rgb(47, 125, 72);
   color: #fafafa;
 }
 
 .settings-menu.captions-item-divider,
 .settings-menu.quality-item-divider,
-.settings-menu.speed-item-divider {
+.settings-menu.speed-item-divider,
+.settings-menu.audio-item-divider {
   min-width: max-content;
   height: 1.5px;
   background:rgba(100,100,100,0.13);
@@ -146,7 +153,8 @@
 
 .settings-menu.captions-item-radio,
 .settings-menu.quality-item-radio,
-.settings-menu.speed-item-radio {
+.settings-menu.speed-item-radio,
+.settings-menu.audio-item-radio {
   flex-shrink: 0;
   width: 14px;
   height: 14px;
@@ -157,19 +165,22 @@
 
 .settings-menu.captions-item-radio.selected,
 .settings-menu.quality-item-radio.selected,
-.settings-menu.speed-item-radio.selected {
+.settings-menu.speed-item-radio.selected,
+.settings-menu.audio-item-radio.selected {
   box-shadow: inset 0 0 0 4px rgb(41, 166, 79);;
   background-color: white;
 }
 
 .settings-menu.captions-item:hover .settings-menu.captions-item-radio,
 .settings-menu.quality-item:hover .settings-menu.quality-item-radio,
-.settings-menu.speed-item:hover .settings-menu.speed-item-radio {
+.settings-menu.speed-item:hover .settings-menu.speed-item-radio,
+.settings-menu.audio-item:hover .settings-menu.audio-item-radio {
   background-color: rgb(22, 74, 38);
 }
 .settings-menu.captions-item:hover .settings-menu.captions-item-radio.selected,
 .settings-menu.quality-item:hover .settings-menu.quality-item-radio.selected,
-.settings-menu.speed-item:hover .settings-menu.speed-item-radio.selected {
+.settings-menu.speed-item:hover .settings-menu.speed-item-radio.selected,
+.settings-menu.audio-item:hover .settings-menu.audio-item-radio.selected {
   background-color: white;
 }
 
