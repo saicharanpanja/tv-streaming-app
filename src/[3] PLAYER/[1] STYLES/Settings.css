@@ -12,7 +12,6 @@
   transform: rotate(60deg);
 }
 
-
 /*---- LABEL ON SETTINGS ICON ---------------------------------*/
 .settings-icon-quality-label-4k,
 .settings-icon-quality-label-hd,
@@ -43,166 +42,214 @@
   background-color: rgba(18, 17, 17, 0.9);
 }
 
-/*----- MENU STYLES ---------------------------------------*/
-.settings-menu.main,
-.settings-menu.captions,
-.settings-menu.quality,
-.settings-menu.speed,
-.settings-menu.audio {
-  font-size: 13.5px;
-
-  background-color: rgba(255,255,255,0.95);
-  color: #5C5C5C;
+/*----- MENU CONTAINER ---------------------------------------*/
+.settings-menu-container {
+  position: absolute;
+  bottom: calc(50px + 12px);
+  right: 12px;
+  
+  overflow: hidden;
   border-radius: 8px;
+  background-color: rgba(8, 9, 10, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: height 0.28s ease-in-out, width 0.28s ease-in-out;
+}
+
+.settings-menu-container.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* MENUS */
+.settings-menu.mainmenu,
+.settings-menu.submenu {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
-  z-index: 3;
+  min-width: 200px;
 
   position: absolute;
-  bottom: 40px;
-  right: -15px;
-  padding: 7px;
+  padding: 6px;
 
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.28s ease-in-out, opacity 0.28s ease-in-out;
+}
+
+.settings-menu.submenu {
+  transform: translateX(var(--container-width));
+}
+
+.settings-menu.mainmenu.active,
+.settings-menu.submenu.active {
   opacity: 1;
   visibility: visible;
-  transform: translateX(0) translateY(0);
-  transition: all 0.2s ease-in-out;
+  transform: translateX(0);
 }
 
-.settings-menu.captions,
-.settings-menu.quality,
-.settings-menu.speed,
-.settings-menu.audio  {
-  padding: 5px;
+/* MENU LIST */
+.settings-menu.submenu-list {
+  position: relative;
+  max-height: 50cqh;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: #555 transparent;
 }
 
-.settings-menu.main.hide {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(1.5%) translateY(10%);
+/* Support for older Browsers */
+.settings-menu.submenu-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-.settings-menu.captions.hide,
-.settings-menu.quality.hide,
-.settings-menu.speed.hide,
-.settings-menu.audio.hide {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(calc(-20px)) translateY(0);
+.settings-menu.submenu-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.settings-menu.main-item,
-.settings-menu.captions-item,
-.settings-menu.quality-item,
-.settings-menu.speed-item,
-.settings-menu.audio-item   {
+.settings-menu.submenu-list::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+.settings-menu.submenu-list::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+/* MENU ITEMS */
+.settings-menu.mainmenu-item,
+.settings-menu.submenu-item {
   display: flex;
   align-items: center;
   gap: 10px;
 
-  min-width: max-content;
-  padding: 7px;
-  border-radius: 5px;
-  transition: all 0.3s ease-in-out;
+  font-size: 15px;
+  color: #b1a99c;
+  padding: 5px 7px;
   cursor: pointer;
   user-select: none;
-
   background: transparent;
   border: none;
+  border-radius: 5px;
+  min-width: max-content;
+  width: 100%;
+  transition: all 0.2s ease-in-out;
 }
 
-.settings-menu.captions-item,
-.settings-menu.quality-item,
-.settings-menu.speed-item,
-.settings-menu.audio-item  {
-  position: relative;
-  gap: 12.5px;
-  padding: 7px 35px 7px 10px;
+.settings-menu.submenu-item {
+  padding: 10px 50px 10px 10px;
 }
 
-.settings-menu.quality-item {
-  padding: 7px 30px 7px 10px;
+.settings-menu.mainmenu-item:hover,
+.settings-menu.submenu-item:hover {
+  background: #29643b;
+  color: #e9e5de;
 }
 
-.settings-menu.speed-item {
-  padding: 7px 10px 7px 10px;
+/* Item Spacer*/
+.settings-menu.mainmenu-item-spacer {
+  width: 15px;
+  flex: 1;
 }
 
-.settings-menu.main-item:hover,
-.settings-menu.captions-item:hover,
-.settings-menu.quality-item:hover,
-.settings-menu.speed-item:hover,
-.settings-menu.audio-item:hover {
-  background-color: rgb(47, 125, 72);
-  color: #fafafa;
-}
-
-.settings-menu.captions-item-divider,
-.settings-menu.quality-item-divider,
-.settings-menu.speed-item-divider,
-.settings-menu.audio-item-divider {
+/* Item Divider */
+.settings-menu.submenu-item-divider {
   min-width: max-content;
   height: 1.5px;
-  background:rgba(100,100,100,0.13);
+  background: rgba(230, 230, 230, 0.2);
   border-radius: 2px;
-  margin: 1.5px 6px;
+  margin: 1.5px 5px;
 }
 
-.settings-menu.captions-item-radio,
-.settings-menu.quality-item-radio,
-.settings-menu.speed-item-radio,
-.settings-menu.audio-item-radio {
+/* Radio Button*/
+.settings-menu.submenu-item-radio {
   flex-shrink: 0;
   width: 14px;
   height: 14px;
-  background-color: #ccc;
+  background-color: #363a3b;
   border-radius: 50%;
   transition: all 0.2s ease-in-out;
 }
 
-.settings-menu.captions-item-radio.selected,
-.settings-menu.quality-item-radio.selected,
-.settings-menu.speed-item-radio.selected,
-.settings-menu.audio-item-radio.selected {
-  box-shadow: inset 0 0 0 4px rgb(41, 166, 79);;
-  background-color: white;
+.settings-menu.submenu-item:hover .settings-menu.submenu-item-radio {
+  background-color: #143b1f;
 }
 
-.settings-menu.captions-item:hover .settings-menu.captions-item-radio,
-.settings-menu.quality-item:hover .settings-menu.quality-item-radio,
-.settings-menu.speed-item:hover .settings-menu.speed-item-radio,
-.settings-menu.audio-item:hover .settings-menu.audio-item-radio {
-  background-color: rgb(22, 74, 38);
-}
-.settings-menu.captions-item:hover .settings-menu.captions-item-radio.selected,
-.settings-menu.quality-item:hover .settings-menu.quality-item-radio.selected,
-.settings-menu.speed-item:hover .settings-menu.speed-item-radio.selected,
-.settings-menu.audio-item:hover .settings-menu.audio-item-radio.selected {
-  background-color: white;
+.settings-menu.submenu-item-radio.selected {
+  box-shadow: #268440 0 0 0 4px inset;
+  background-color: #191a1b;
 }
 
-.settings-menu.captions-item-label,
-.settings-menu.quality-item-label-4k,
-.settings-menu.quality-item-label-hd,
-.settings-menu.quality-item-label-sd {
+/* Labels */
+.settings-menu.submenu-item-tag,
+.settings-menu.submenu-item-tag-4k,
+.settings-menu.submenu-item-tag-hd,
+.settings-menu.submenu-item-tag-sd {
   position: absolute;
-  text-align: center;
   right: 5px;
-  letter-spacing: 0.3px;
-  font-size: 8.5px;
-  background-color: rgba(40, 39, 39, 0.9);
-  color: rgba(255,255,255,0.85);
+
   padding: 2.5px;
+  color: #e9e5de;
+  font-size: 8.5px;
+  text-align: center;
   border-radius: 3px;
+  letter-spacing: 0.3px;
+  background-color: rgba(230, 230, 230, 0.15);
 }
 
-.settings-menu.quality-item-label-4k {
+.settings-menu.submenu-item-tag-4k {
   background-color: rgba(220, 20, 60, 0.8);
 }
 
-.settings-menu.quality-item-label-hd {
+.settings-menu.submenu-item-tag-hd {
   background-color: rgba(27, 88, 46, 0.9);
+}
+
+/*ADDITIONAL MOBILE CSS
+@container video-player (max-width: 500px) {
+  .settings-menu-container {
+    position: fixed;
+    bottom: 60px;
+    left: 10px;
+    right: 10px;
+  }
+
+  .settings-menu.mainmenu,
+  .settings-menu.submenu {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+  }
+
+  .settings-menu.menu-item,
+  .settings-menu.submenu-item {
+    font-size: 1.4rem;
+    padding: 15px;
+  }
+
+  .settings-menu.submenu-list {
+    max-height: 80cqh;
+  }
+
+  .settings-menu.submenu-item-radio {
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+  }
+
+  .settings-menu.submenu-item-tag,
+  .settings-menu.submenu-item-tag-4k,
+  .settings-menu.submenu-item-tag-hd,
+  .settings-menu.submenu-item-tag-sd {
+    right: 10px;
+    padding: 4px;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+  }
+
 }

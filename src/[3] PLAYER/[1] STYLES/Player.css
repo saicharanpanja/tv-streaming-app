@@ -9,11 +9,12 @@
   background-color: black;
   aspect-ratio: 16 / 9;
 
-  container-type: inline-size;
+  /*captions fontsize and settingsmenu use these*/
+  container-type: size;
+  container-name: video-player; 
 }
-.player-container.hide-cursor {
-  cursor: none;
-}
+
+.player-container.hide-cursor { cursor: none; }
 
 .video-wrapper {
   position: absolute;
@@ -209,7 +210,7 @@
   line-height: 1.5; 
   white-space: pre-wrap;
   font-family: "Gordita-Medium", "Roboto", sans-serif;
-  font-size: clamp(14px, 2cqw, 22px);
+  font-size: clamp(14px, 2cqmin, 22px);
 
   color: white;
   padding: 1.8px 10px; 

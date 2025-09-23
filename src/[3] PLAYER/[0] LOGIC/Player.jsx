@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 
+import SettingsMenu from "./SettingsMenu";
 import Seekbar from "./Seekbar";
 import SkipPrev from "./SkipPrev";
 import PlayPause from "./PlayPause";
 import SkipNext from "./SkipNext";
 import Volume from "./Volume";
 import Captions from "./Captions";
-import Audio from "./Audio";
-import Settings from "./Settings/Settings";
+import Settings from "./Settings";
 import Fullscreen from "./Fullscreen";
 import IconSprite from "../[2] UTILS/IconSprite";
 
@@ -35,6 +35,8 @@ function Player({
   // UI Visibility State
   const [isPaused, setIsPaused] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [playerSize, setPlayerSize] = useState({ width: 0, height: 0 });
 
   //Get current Source and Poster and check hasPrev, hasNext
   const [currentIndex, setCurrentIndex] = useState(index);
@@ -44,7 +46,7 @@ function Player({
   const hasNext = currentIndex < sourcesArray.length - 1;
   useEffect(() => setCurrentIndex(index), [index]);
 
-  // States for Captions, Qualities and Audio
+  // States for Captions, Qualities, Audio and playbackRate.
   const [captionsText, setCaptionsText] = useState("");
   const [captionsArray, setCaptionsArray] = useState([]);
   const [captionsLabel, setCaptionsLabel] = useState(() => localStorage.getItem("player:captions") || 'Disabled');
@@ -59,6 +61,12 @@ function Player({
 
   const [audiosArray, setAudiosArray] = useState([]);
   const [audioLabel, setAudioLabel] = useState(() => localStorage.getItem("player:audio") || null);
+
+  const playbackRatesArray = [0.5, 0.75, 1, 1.25, 1.5];
+  const [playbackRate, setPlaybackRate] = useState(() => {
+    const n = parseFloat(localStorage.getItem("player:playbackRate"));
+    return !isNaN(n) ? n : 1;
+  });
 
   // Listen to core video events (play, pause, ended)
   useEffect(() => {
@@ -84,6 +92,23 @@ function Player({
       : hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000);
   }, [isPaused]);
 
+  // Listen to player size and update it
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleResize = () => {
+      setPlayerSize({
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+      });
+    };
+
+    const observer = new ResizeObserver(handleResize);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   // HLS Setup, Get quality heights, subtitles, audio tracks and teardown.
   useEffect(() => {
     const video = videoRef.current;
@@ -98,7 +123,10 @@ function Player({
       const uniqueCaptions = Array.from(video.textTracks).filter(
         (t) => t.kind === "subtitles" || t.kind === "captions"
       );
-      setCaptionsArray(uniqueCaptions);
+      setCaptionsArray([
+        { language: "disabled", label: "Disabled", mode: "disabled" },
+        ...uniqueCaptions,
+      ]);
     }
 
     if (Hls.isSupported()) {
@@ -119,8 +147,12 @@ function Player({
         // Convert to new array without bitrates.
         const uniqueHeights = Array.from(map.entries())
           .map(([height, obj]) => ({ height, levelIndex: obj.levelIndex }))
-          .sort((a, b) => a.height - b.height);
-        setQualitiesArray(uniqueHeights);
+          .sort((a, b) => b.height - a.height);
+
+        setQualitiesArray([
+          ...uniqueHeights,
+          { height: "Auto", levelIndex: -1 }
+        ]);
       });
 
       // Get the available audio levels.
@@ -155,7 +187,7 @@ function Player({
 
   // Apply the saved captions whenever changes.
   useEffect(() => {
-    if (captionsArray.length > 0) {
+    if (captionsArray.length > 1) {
       const getConsistentLabel = track => {
         const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
         return langMap[track.language] || track.label;
@@ -163,7 +195,7 @@ function Player({
 
       let trackFound = null;
       captionsArray.forEach(track => {
-        if (getConsistentLabel(track) === captionsLabel) {
+        if (captionsLabel !== "Disabled" && getConsistentLabel(track) === captionsLabel) {
           track.mode = 'hidden';
           trackFound = track;
         } else {
@@ -185,7 +217,7 @@ function Player({
       } else setCaptionsText('');
 
       if (!trackFound && captionsLabel !== 'Disabled') {
-        setCaptionsLabel(getConsistentLabel(captionsArray[0]));
+        setCaptionsLabel(getConsistentLabel(captionsArray[1]));
       }
     } else setCaptionsText('');
   }, [captionsArray, captionsLabel]);
@@ -193,11 +225,11 @@ function Player({
   // Apply the saved quality whenever changes.
   useEffect(() => {
     const hls = hlsRef.current;
-    if (!hls || qualitiesArray.length === 0) return;
+    if (!hls || qualitiesArray.length < 2) return;
 
     const match = qualitiesArray.find(q => q.height === qualityLabel);
 
-    if (qualityLabel !== "Auto" && match) {
+    if (match) {
       hls.currentLevel !== match.levelIndex && (hls.currentLevel = match.levelIndex);
     } else {
       hls.currentLevel !== -1 && (hls.currentLevel = -1);
@@ -219,6 +251,19 @@ function Player({
       setAudioLabel(audiosArray[hls.audioTrack].name);
     }
   }, [audiosArray, audioLabel]);
+
+  // Apply the saved playbackRate whenever changes.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.playbackRate = playbackRate;
+    if ("preservesPitch" in video) {
+      video.preservesPitch = true;
+    } else if ("mozPreservesPitch" in video) {
+      video.mozPreservesPitch = true;
+    }
+  }, [currentSrc, playbackRate]);
 
   // Save the captionsLabel whenever changes.
   useEffect(() => {
@@ -249,6 +294,15 @@ function Player({
       console.error("[Player] Could not save audio state:", err);
     }
   }, [audioLabel]);
+
+  // Save the playbackRate whenever changes.
+  useEffect(() => {
+    try {
+      localStorage.setItem("player:playbackRate", playbackRate.toString());
+    } catch (err) {
+      console.error("[Player] Could not save playback rate:", err);
+    }
+  }, [playbackRate]);
 
   const handlePrev = () => {
     if (hasPrev) {
@@ -309,6 +363,29 @@ function Player({
         </div>
       }
 
+      <SettingsMenu
+        playerSize={playerSize}
+
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+
+        audiosArray={audiosArray}
+        captionsArray={captionsArray}
+        qualitiesArray={qualitiesArray}
+        playbackRatesArray={playbackRatesArray}
+
+        autoHeight={autoHeight}
+        audioLabel={audioLabel}
+        captionsLabel={captionsLabel}
+        qualityLabel={qualityLabel}
+        playbackRate={playbackRate}
+
+        setAudioLabel={setAudioLabel}
+        setCaptionsLabel={setCaptionsLabel}
+        setQualityLabel={setQualityLabel}
+        setPlaybackRate={setPlaybackRate}
+      />
+
       <div
         className={`video-controls-container${controlsVisible ? "" : " hide"}`}
         onMouseEnter={() => isHoveringControlsRef.current = true}
@@ -353,7 +430,7 @@ function Player({
 
           <div className="spacer"></div>
 
-          {captionsArray.length !== 0 &&
+          {captionsArray.length > 1 &&
             <Captions
               captionsLabel={captionsLabel}
               setCaptionsLabel={setCaptionsLabel}
@@ -362,25 +439,11 @@ function Player({
             />
           }
 
-          {audiosArray.length !== 0 && <Audio />}
-
           <Settings
-            hlsRef={hlsRef}
-            videoRef={videoRef}
-            currentSrc={currentSrc}
-
-            captionsArray={captionsArray}
-            captionsLabel={captionsLabel}
-            setCaptionsLabel={setCaptionsLabel}
-
-            qualitiesArray={qualitiesArray}
+            activeMenu={activeMenu}
+            setActiveMenu={setActiveMenu}
             autoHeight={autoHeight}
             qualityLabel={qualityLabel}
-            setQualityLabel={setQualityLabel}
-
-            audiosArray={audiosArray}
-            audioLabel={audioLabel}
-            setAudioLabel={setAudioLabel}
           />
 
           <Fullscreen

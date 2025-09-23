@@ -12,14 +12,14 @@ export default function Captions({
   const areCaptionsOn = captionsLabel !== 'Disabled';
 
   const toggleCaptions = useCallback(() => {
-    if (captionsArray.length === 0) return;
+    if (captionsArray.length < 2) return;
 
     if (areCaptionsOn) {
       setCaptionsLabel('Disabled');
     } else {
       const lastActive = localStorage.getItem("player:lastActiveCaption");
-      const firstAvailable = captionsArray[0] ? (
-        { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[captionsArray[0].language] || captionsArray[0].label
+      const firstAvailable = captionsArray[1] ? (
+        { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[captionsArray[1].language] || captionsArray[1].label
       ) : 'Disabled';
 
       setCaptionsLabel(lastActive || firstAvailable);

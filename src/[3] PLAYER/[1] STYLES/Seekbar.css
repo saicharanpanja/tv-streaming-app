@@ -47,7 +47,8 @@
 /* 3. Play progress */
 .play-progress-fill {
   border-radius: 4px;
-  background-color: rgb(47, 125, 72);
+  /*background-color: rgb(47, 125, 72);*/
+  background-color: #fafafa;
   z-index: 4;
 }
 
@@ -97,26 +98,29 @@
 }
 
 /* Add shadow effect when input is active (being dragged) */
-.play-progress-input:active ~ .seekbar-track-wrapper .progress-thumb {
+.play-progress-input:active~.seekbar-track-wrapper .progress-thumb {
   transform: translate(-50%, -50%) scale(1.2);
 }
 
 /* Buffering Animation - applied to the base track */
 .seekbar-container.buffering .seekbar-track {
-  background-image: repeating-linear-gradient(
-    60deg,
-    rgba(240, 240, 240, 0.4) 0,
-    rgba(240, 240, 240, 0.4) 10px,
-    rgba(150, 150, 150, 0.4) 10px,
-    rgba(150, 150, 150, 0.4) 20px
-  );
+  background-image: repeating-linear-gradient(60deg,
+      rgba(240, 240, 240, 0.4) 0,
+      rgba(240, 240, 240, 0.4) 10px,
+      rgba(150, 150, 150, 0.4) 10px,
+      rgba(150, 150, 150, 0.4) 20px);
   background-size: 20px 20px;
   animation: zebraMove 0.6s linear infinite;
 }
 
 @keyframes zebraMove {
-  from { background-position: 0 0; }
-  to { background-position: 20px 0; }
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 20px 0;
+  }
 }
 
 /* Hover Line and Tooltip Styles */
@@ -125,7 +129,8 @@
   top: 50%;
   height: 4px;
   width: 2px;
-  background-color: rgba(255, 255, 255, 0.8);
+  /*background-color: rgba(255, 255, 255, 0.8);*/
+  background-color: #333;
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 6;
