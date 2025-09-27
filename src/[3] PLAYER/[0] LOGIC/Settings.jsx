@@ -7,13 +7,13 @@ export default function Settings({
   qualityLabel
 }) {
   return (
-    <div className="video-controls settings-container">
+    <button
+      className="video-controls settings-container"
+      onClick={() => setActiveMenu(!activeMenu ? "main" : null)}
+    >
       <Icon
         name="settings"
         className={`settings-menu icon${activeMenu ? " rotate" : ""}`}
-        onClick={() => {
-          setActiveMenu(!activeMenu ? "main" : null);
-        }}
       />
 
       <span
@@ -29,6 +29,6 @@ export default function Settings({
                 ""
         }
       </span>
-    </div>
+    </button>
   );
 }

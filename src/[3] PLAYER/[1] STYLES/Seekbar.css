@@ -18,7 +18,7 @@
   pointer-events: none;
 }
 
-/* Common base styles for all visual track/progress elements */
+/* --- CHILDREN OF TRACK WRAPPER --- */
 .seekbar-track,
 .buffer-progress,
 .play-progress-fill {
@@ -47,12 +47,43 @@
 /* 3. Play progress */
 .play-progress-fill {
   border-radius: 4px;
-  /*background-color: rgb(47, 125, 72);*/
   background-color: #fafafa;
-  z-index: 4;
+  z-index: 3;
 }
 
-/* The actual <input> element - invisible but on top for interaction */
+/*4. Hover line*/
+.hover-line {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* 5. Thumb */
+.progress-thumb {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  pointer-events: none;
+  background-color: #fafafa;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seekbar-container:hover .progress-thumb {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.play-progress-input:active~.seekbar-track-wrapper .progress-thumb {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+
+/* --- Actual <input> element - invisible but on top for interaction --- */
 .play-progress-input {
   position: absolute;
   left: 12px;
@@ -78,28 +109,20 @@
   opacity: 0;
 }
 
-/* Styles for custom thumb element */
-.progress-thumb {
+/* Hover Tooltip */
+.hover-tooltip {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  width: 12px;
-  height: 12px;
-  background-color: #fafafa;
-  border-radius: 50%;
+  bottom: 25px;
+  background-color: rgba(20, 20, 20, 0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
   pointer-events: none;
-  z-index: 5;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Show the thumb when hovering the main container */
-.seekbar-container:hover .progress-thumb {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-/* Add shadow effect when input is active (being dragged) */
-.play-progress-input:active~.seekbar-track-wrapper .progress-thumb {
-  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 6;
+  white-space: nowrap;
+  user-select: none;
 }
 
 /* Buffering Animation - applied to the base track */
@@ -121,32 +144,4 @@
   to {
     background-position: 20px 0;
   }
-}
-
-/* Hover Line and Tooltip Styles */
-.hover-line {
-  position: absolute;
-  top: 50%;
-  height: 4px;
-  width: 2px;
-  /*background-color: rgba(255, 255, 255, 0.8);*/
-  background-color: #333;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 6;
-}
-
-.hover-tooltip {
-  position: absolute;
-  bottom: 25px;
-  background-color: rgba(20, 20, 20, 0.8);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  pointer-events: none;
-  z-index: 6;
-  white-space: nowrap;
-  user-select: none;
 }

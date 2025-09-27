@@ -12,7 +12,7 @@ export default function Captions({
   const areCaptionsOn = captionsLabel !== 'Disabled';
 
   const toggleCaptions = useCallback(() => {
-    if (captionsArray.length < 2) return;
+    if (captionsArray.length < 1) return;
 
     if (areCaptionsOn) {
       setCaptionsLabel('Disabled');

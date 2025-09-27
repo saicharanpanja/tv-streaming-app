@@ -186,22 +186,26 @@ export default function Seekbar({
     const clampedPositionX = Math.max(0, Math.min(positionX, trackWidth));
 
     // --- Line Position Calculation ---
-    const linePosition = 12 + clampedPositionX; // 12 is container's left padding
+    const linePosition = clampedPositionX;
 
     // --- Tip Position Calculation ---
-    const idealTipPosition = linePosition - (tooltipWidth / 2);
-    const minTipPosition = 6;
-    const maxTipPosition = containerWidth - tooltipWidth - 6;
+    const idealTipPosition = (linePosition + 12) - (tooltipWidth / 2);  // 12 is container's left padding
+    const minTipPosition = 12;
+    const maxTipPosition = containerWidth - tooltipWidth - 12;
     const finalTipPosition = Math.max(minTipPosition, Math.min(idealTipPosition, maxTipPosition));
 
     // --- Time Calculation ---
     const hoverPercentage = (clampedPositionX / trackWidth) * 100;
     const timeInSeconds = (duration * hoverPercentage) / 100;
 
+    // --- Line Color ---
+    const lineColor = hoverPercentage > progress ? "#fafafa" : "#333";
+
     setHoverData({
       time: formatTime(timeInSeconds),
       linePosition: linePosition,
       tipPosition: finalTipPosition,
+      lineColor: lineColor
     });
   };
 
@@ -220,11 +224,6 @@ export default function Seekbar({
         {hoverData?.time || "00:00"}
       </div>
 
-      <div
-        className="hover-line"
-        style={{ opacity: hoverData ? 1 : 0, left: hoverData?.linePosition || 0 }}
-      />
-
       <input
         className="play-progress-input"
         type="range"
@@ -242,6 +241,14 @@ export default function Seekbar({
         <div className="seekbar-track" />
         <div className="buffer-progress" style={{ width: `${bufferedProgress}%` }} />
         <div className="play-progress-fill" style={{ width: `${progress}%` }} />
+        <div
+          className="hover-line"
+          style={{
+            opacity: hoverData ? 1 : 0,
+            left: hoverData?.linePosition || 0,
+            backgroundColor: hoverData?.lineColor || "#333"
+          }}
+        />
         <div className="progress-thumb" style={{ left: `${progress}%` }} />
       </div>
 

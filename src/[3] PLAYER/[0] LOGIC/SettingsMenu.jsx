@@ -3,6 +3,7 @@ import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import Icon from "../[2] UTILS/Icon";
 
 function SettingsMenu({
+  playerSize,
   activeMenu,
   setActiveMenu,
 
@@ -38,15 +39,15 @@ function SettingsMenu({
     const menuIsAvailable = {
       main: true,
       audio: audiosArray.length > 0,
-      captions: captionsArray.length > 1,
+      captions: captionsArray.length > 0,
       quality: qualitiesArray.length > 0,
       speed: playbackRatesArray.length > 0,
     };
 
     if (!menuIsAvailable[activeMenu]) {
-      container.style.height = 0;
-      container.style.width = 0;
+      container.style.opacity = "0";
       container.style.setProperty("--container-width", 0);
+      (playerSize.width > 0 && playerSize.width <= 600) && (container.style.height = "0");
       return;
     }
 
@@ -63,16 +64,15 @@ function SettingsMenu({
 
     const updateSize = () => {
       const { offsetWidth, offsetHeight } = el;
+      container.style.opacity = "1";
       container.style.height = `${offsetHeight}px`;
-      container.style.width = `${offsetWidth}px`;
-      container.style.setProperty("--container-width", `${offsetWidth}px`);
-      /*if (playerSize.width > 500) {
+      if (playerSize.width > 600) {
         container.style.width = `${offsetWidth}px`;
         container.style.setProperty("--container-width", `${offsetWidth}px`);
       } else {
-        container.style.width = "auto";
+        container.style.width = "calc(100% - 20px)";
         container.style.setProperty("--container-width", "100%");
-      }*/
+      }
     };
 
     const observer = new ResizeObserver(updateSize);
@@ -83,6 +83,7 @@ function SettingsMenu({
     audiosArray.length,
     captionsArray.length,
     playbackRatesArray.length,
+    playerSize.width,
     qualitiesArray.length,
     setActiveMenu
   ]);
@@ -130,36 +131,39 @@ function SettingsMenu({
             className="settings-menu mainmenu-item"
             onClick={() => setActiveMenu("audio")}
           >
-            <Icon name="audio-menu" size={27}/>
+            <Icon name="audio-menu" size={27} />
             <span>Audio</span>
+            <span>({audiosArray.length})</span>
             <span className="settings-menu mainmenu-item-spacer"></span>
             <span>{audioLabel}</span>
             <CaretRightIcon size={12} style={{ marginLeft: "-6px" }} />
           </button>
         }
 
-        {captionsArray.length > 1 &&
+        {captionsArray.length > 0 &&
           <button
             className="settings-menu mainmenu-item"
             onClick={() => setActiveMenu("captions")}
           >
             <Icon name="captions-menu" size={27} />
             <span>Captions</span>
+            <span>({captionsArray.length - 1})</span>
             <span className="settings-menu mainmenu-item-spacer"></span>
             <span>{captionsLabel}</span>
             <CaretRightIcon size={12} style={{ marginLeft: "-6px" }} />
           </button>
         }
 
-        {qualitiesArray.length > 1 &&
+        {qualitiesArray.length > 0 &&
           <button
             className="settings-menu mainmenu-item"
             onClick={() => setActiveMenu("quality")}
           >
-            <Icon name="quality-menu" size={27}/>
+            <Icon name="quality-menu" size={27} />
             <span>Quality</span>
             <span className="settings-menu mainmenu-item-spacer"></span>
             <span>{qualityLabel === "Auto" ? "Auto" : `${qualityLabel}p`}</span>
+            {qualityLabel === "Auto" && <span>({autoHeight}p)</span>}
             <CaretRightIcon size={12} style={{ marginLeft: "-6px" }} />
           </button>
         }
@@ -169,7 +173,7 @@ function SettingsMenu({
             className="settings-menu mainmenu-item"
             onClick={() => setActiveMenu("speed")}
           >
-            <Icon name="speed-menu" size={27}/>
+            <Icon name="speed-menu" size={27} />
             <span>Speed</span>
             <span className="settings-menu mainmenu-item-spacer"></span>
             <span>{playbackRate === 1 ? "Normal" : `${playbackRate}×`}</span>
@@ -205,7 +209,7 @@ function SettingsMenu({
       }
 
       {/*Captions Menu*/}
-      {captionsArray.length > 1 &&
+      {captionsArray.length > 0 &&
         <div
           ref={captionsRef}
           className={`settings-menu submenu${activeMenu === 'captions' ? ' active' : ''}`}
@@ -240,7 +244,7 @@ function SettingsMenu({
       }
 
       {/*Quality Menu*/}
-      {qualitiesArray.length > 1 &&
+      {qualitiesArray.length > 0 &&
         <div
           ref={qualityRef}
           className={`settings-menu submenu${activeMenu === "quality" ? " active" : ""}`}

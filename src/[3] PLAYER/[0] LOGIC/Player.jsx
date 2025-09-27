@@ -123,10 +123,12 @@ function Player({
       const uniqueCaptions = Array.from(video.textTracks).filter(
         (t) => t.kind === "subtitles" || t.kind === "captions"
       );
-      setCaptionsArray([
-        { language: "disabled", label: "Disabled", mode: "disabled" },
-        ...uniqueCaptions,
-      ]);
+
+      uniqueCaptions.length > 0
+        ? setCaptionsArray([
+          { language: "disabled", label: "Disabled", mode: "disabled" },
+          ...uniqueCaptions])
+        : setActiveMenu(prev => prev === "captions" ? null : prev);
     }
 
     if (Hls.isSupported()) {
@@ -149,15 +151,27 @@ function Player({
           .map(([height, obj]) => ({ height, levelIndex: obj.levelIndex }))
           .sort((a, b) => b.height - a.height);
 
-        setQualitiesArray([
-          ...uniqueHeights,
-          { height: "Auto", levelIndex: -1 }
-        ]);
+        uniqueHeights.length > 0
+          ? setQualitiesArray([
+            ...uniqueHeights,
+            { height: "Auto", levelIndex: -1 }])
+          : setActiveMenu(prev => prev === "quality" ? null : prev);
       });
 
       // Get the available audio levels.
+      // Close the open audio menu if no audio levels.
+      let isAudioEventFired = false;
       hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, { audioTracks }) => {
-        if (audioTracks.length > 0) setAudiosArray(audioTracks);
+        isAudioEventFired = true;
+        setAudiosArray(audioTracks);
+      });
+
+      hls.on(Hls.Events.LEVEL_LOADED, () => {
+        if (isAudioEventFired) return;
+        isAudioEventFired = true;
+        hls.audioTracks.length < 1 && setActiveMenu(
+          prev => prev === "audio" ? null : prev
+        );
       });
 
       // Set the AutoHeight if quality changes.
@@ -187,7 +201,7 @@ function Player({
 
   // Apply the saved captions whenever changes.
   useEffect(() => {
-    if (captionsArray.length > 1) {
+    if (captionsArray.length > 0) {
       const getConsistentLabel = track => {
         const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
         return langMap[track.language] || track.label;
@@ -225,7 +239,7 @@ function Player({
   // Apply the saved quality whenever changes.
   useEffect(() => {
     const hls = hlsRef.current;
-    if (!hls || qualitiesArray.length < 2) return;
+    if (!hls || qualitiesArray.length < 1) return;
 
     const match = qualitiesArray.find(q => q.height === qualityLabel);
 
@@ -240,7 +254,7 @@ function Player({
   // Apply the saved audio whenever changes.
   useEffect(() => {
     const hls = hlsRef.current;
-    if (!hls || audiosArray.length === 0) return;
+    if (!hls || audiosArray.length < 1) return;
 
     const match = audiosArray.find(t => t.name === audioLabel);
 
@@ -337,7 +351,7 @@ function Player({
       ref={containerRef}
       tabIndex="-1"
       style={{ outline: 'none' }}
-      className={`player-container${controlsVisible ? " controls-visible" : " hide-cursor"}`}
+      className={`player-container${controlsVisible || activeMenu ? " controls-visible" : " hide-cursor"}`}
       onMouseLeave={() => !isPaused && (clearTimeout(hideControlsTimeout.current), setControlsVisible(false))}
       onMouseMove={() => {
         if (isPaused) return;
@@ -365,7 +379,6 @@ function Player({
 
       <SettingsMenu
         playerSize={playerSize}
-
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
 
@@ -387,7 +400,7 @@ function Player({
       />
 
       <div
-        className={`video-controls-container${controlsVisible ? "" : " hide"}`}
+        className={`video-controls-container${controlsVisible || activeMenu ? "" : " hide"}`}
         onMouseEnter={() => isHoveringControlsRef.current = true}
         onMouseLeave={() => isHoveringControlsRef.current = false}
       >
@@ -430,7 +443,7 @@ function Player({
 
           <div className="spacer"></div>
 
-          {captionsArray.length > 1 &&
+          {captionsArray.length > 0 &&
             <Captions
               captionsLabel={captionsLabel}
               setCaptionsLabel={setCaptionsLabel}

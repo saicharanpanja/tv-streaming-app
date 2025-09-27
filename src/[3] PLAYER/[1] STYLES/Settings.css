@@ -9,7 +9,7 @@
 }
 
 .settings-menu.icon.rotate {
-  transform: rotate(60deg);
+  transform: rotate(-60deg);
 }
 
 /*---- LABEL ON SETTINGS ICON ---------------------------------*/
@@ -47,21 +47,19 @@
   position: absolute;
   bottom: calc(50px + 12px);
   right: 12px;
-  
+
   overflow: hidden;
   border-radius: 8px;
   background-color: rgba(8, 9, 10, 0.9);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
-  transition: height 0.28s ease-in-out, width 0.28s ease-in-out;
+  transition: height 0.28s ease-in-out, width 0.28s ease-in-out, opacity 0.2s ease-in-out;
 }
 
 .settings-menu-container.active {
   opacity: 1;
-  visibility: visible;
   pointer-events: auto;
 }
 
@@ -127,7 +125,7 @@
   align-items: center;
   gap: 10px;
 
-  font-size: 15px;
+  font-size: clamp(15px, 1.05rem, 30px);
   color: #b1a99c;
   padding: 5px 7px;
   cursor: pointer;
@@ -209,26 +207,27 @@
   background-color: rgba(27, 88, 46, 0.9);
 }
 
-/*ADDITIONAL MOBILE CSS
-@container video-player (max-width: 500px) {
+/*ADDITIONAL MOBILE CSS*/
+@container video-player (max-width: 600px) {
   .settings-menu-container {
     position: fixed;
     bottom: 60px;
     left: 10px;
     right: 10px;
+    z-index: 999;
   }
 
   .settings-menu.mainmenu,
   .settings-menu.submenu {
     width: 100%;
     box-sizing: border-box;
-    padding: 15px;
+    padding: 10px;
   }
 
-  .settings-menu.menu-item,
+  .settings-menu.mainmenu-item,
   .settings-menu.submenu-item {
-    font-size: 1.4rem;
-    padding: 15px;
+    font-size: clamp(15px, 1.15rem, 30px);
+    padding: 10px 9px;
   }
 
   .settings-menu.submenu-list {
