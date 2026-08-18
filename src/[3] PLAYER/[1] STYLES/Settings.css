@@ -2,16 +2,6 @@
   position: relative;
 }
 
-.settings-menu.icon {
-  fill: white;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-}
-
-.settings-menu.icon.rotate {
-  transform: rotate(-60deg);
-}
-
 /*---- LABEL ON SETTINGS ICON ---------------------------------*/
 .settings-icon-quality-label-4k,
 .settings-icon-quality-label-hd,

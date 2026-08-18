@@ -1,19 +1,16 @@
 @media screen and (min-width: 751px) {
   .tv-container {
-    margin-left: 65px;
     padding: 20px;
-    gap: 10px;
+    gap: 15px;
   }
 
   .content-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
-
 }
 
 @media screen and (max-width: 750px) {
   .tv-container {
-    margin-bottom: 55px;
     padding: 10px;
     gap: 10px;
   }
@@ -38,13 +35,31 @@
   transition: all 0.3s ease-in-out;
 }
 
-.channel-thumbnail {
+.content-nav-link {
   user-select: none;
-  width: 100%;
-  border-radius: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease-in-out;
+
+  aspect-ratio: 16 / 9;
+  background-color: #f0f0f0;
+  position: relative;
 }
 
-.channel-thumbnail.active {
+.content-nav-link.active {
   display: none;
+}
+
+.content-channel-thumbnail {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease-in-out; 
+}
+
+.content-nav-link:hover .content-channel-thumbnail {
+  transform: scale(1.05);
 }

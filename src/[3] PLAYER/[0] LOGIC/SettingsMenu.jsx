@@ -1,9 +1,21 @@
-import { useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import Icon from "../[2] UTILS/Icon";
+import useDocumentSingleClick from "../hooks/[5] Document Clicks/useDocumentSingleClick";
+import useQualityStorageSync from "../hooks/[0] Storage Sync/useQualityStorageSync";
+import useQualityProtocolSync from "../hooks/[1] Protocol Sync/useQualityProtocolSync";
+import useAudioStorageSync from "../hooks/[0] Storage Sync/useAudioStorageSync";
+import useAudioProtocolSync from "../hooks/[1] Protocol Sync/useAudioProtocolSync";
+import usePlaybackRateStorageSync from "../hooks/[0] Storage Sync/usePlaybackRateStorageSync";
+import usePlaybackRateVideoSync from "../hooks/[2] Video Sync/usePlaybackRateVideoSync";
 
 function SettingsMenu({
-  playerSize,
+  videoRef,
+  protocolRef,
+  currentIndex,
+
+  isMobile,
+  isMenuOpen,
   activeMenu,
   setActiveMenu,
 
@@ -13,27 +25,64 @@ function SettingsMenu({
   playbackRatesArray,
 
   autoHeight,
-  audioLabel,
   captionsLabel,
   qualityLabel,
-  playbackRate,
-
-  setAudioLabel,
   setCaptionsLabel,
   setQualityLabel,
-  setPlaybackRate,
 }) {
   // DOM-Refs
-  const containerRef = useRef(null);
-  const mainRef = useRef(null);
-  const audioRef = useRef(null);
-  const captionsRef = useRef(null);
-  const qualityRef = useRef(null);
-  const speedRef = useRef(null);
+  const settingsContainerRef = useRef(null);
+  const settingsMainMenuRef = useRef(null);
+  const settingsAudioMenuRef = useRef(null);
+  const settingsCaptionMenuRef = useRef(null);
+  const settingsQualityMenuRef = useRef(null);
+  const settingsPlaybackRateMenuRef = useRef(null);
+
+  const [audioLabel, setAudioLabel] = useState(() => {
+    const savedAudio = localStorage.getItem("player:audio");
+    return savedAudio || null;
+  });
+
+  const [playbackRate, setPlaybackRate] = useState(() => {
+    const savedRate = localStorage.getItem("player:playbackRate");
+    const n = parseFloat(savedRate);
+    return !isNaN(n) ? n : 1;
+  });
+
+  useDocumentSingleClick({ isMenuOpen, settingsContainerRef, setActiveMenu });
+  
+  useAudioStorageSync({ audioLabel });
+  useQualityStorageSync({ qualityLabel });
+  usePlaybackRateStorageSync({ playbackRate });
+
+  usePlaybackRateVideoSync({ videoRef, playbackRate, currentIndex });
+  useAudioProtocolSync({ audiosArray, audioLabel, setAudioLabel, protocolRef });
+  useQualityProtocolSync({ qualitiesArray, qualityLabel, setQualityLabel, protocolRef });
+
+  // Focus the first button in menu whenever menu changes.
+  useEffect(() => {
+    if (!activeMenu) return;
+
+    const menuRefs = {
+      main: settingsMainMenuRef,
+      audio: settingsAudioMenuRef,
+      captions: settingsCaptionMenuRef,
+      quality: settingsQualityMenuRef,
+      speed: settingsPlaybackRateMenuRef,
+    };
+
+    const activeContainer = menuRefs[activeMenu]?.current;
+    const firstButton = activeContainer?.querySelector("button");
+    if (!firstButton) return;
+
+    const handleFocus = () => firstButton.focus();
+    activeContainer.addEventListener('transitionend', handleFocus, { once: true });
+    return () => activeContainer.removeEventListener('transitionend', handleFocus);
+  }, [activeMenu]);
 
   // Update the container size based on active Menu & arrayslength change.
   useEffect(() => {
-    const container = containerRef.current;
+    const container = settingsContainerRef.current;
     if (!container) return;
 
     const menuIsAvailable = {
@@ -47,16 +96,16 @@ function SettingsMenu({
     if (!menuIsAvailable[activeMenu]) {
       container.style.opacity = "0";
       container.style.setProperty("--container-width", 0);
-      (playerSize.width > 0 && playerSize.width <= 600) && (container.style.height = "0");
+      isMobile && (container.style.height = "0");
       return;
     }
 
     const menuRefs = {
-      main: mainRef,
-      audio: audioRef,
-      captions: captionsRef,
-      quality: qualityRef,
-      speed: speedRef,
+      main: settingsMainMenuRef,
+      audio: settingsAudioMenuRef,
+      captions: settingsCaptionMenuRef,
+      quality: settingsQualityMenuRef,
+      speed: settingsPlaybackRateMenuRef,
     };
 
     const el = menuRefs[activeMenu]?.current;
@@ -66,7 +115,8 @@ function SettingsMenu({
       const { offsetWidth, offsetHeight } = el;
       container.style.opacity = "1";
       container.style.height = `${offsetHeight}px`;
-      if (playerSize.width > 600) {
+
+      if (!isMobile) {
         container.style.width = `${offsetWidth}px`;
         container.style.setProperty("--container-width", `${offsetWidth}px`);
       } else {
@@ -79,11 +129,11 @@ function SettingsMenu({
     observer.observe(el);
     return () => observer.disconnect();
   }, [
+    isMobile,
     activeMenu,
     audiosArray.length,
     captionsArray.length,
     playbackRatesArray.length,
-    playerSize.width,
     qualitiesArray.length,
     setActiveMenu
   ]);
@@ -113,17 +163,16 @@ function SettingsMenu({
 
   const getQualityTag = height =>
     (height > 1440 && height <= 2160) ? "4K" :
-      (height >= 720 && height <= 1440) ? "HD" :
-        (height >= 480 && height < 720) ? "SD" : "";
+      (height >= 720 && height <= 1440) ? "HD" : "";
 
   return (
     <div
-      ref={containerRef}
-      className={`settings-menu-container${activeMenu ? " active" : ""}`}
+      ref={settingsContainerRef}
+      className={`settings-menu-container${isMenuOpen ? " active" : ""}`}
     >
       {/*Main Menu*/}
       <div
-        ref={mainRef}
+        ref={settingsMainMenuRef}
         className={`settings-menu mainmenu${activeMenu === "main" ? " active" : ""}`}
       >
         {audiosArray.length > 0 &&
@@ -185,7 +234,7 @@ function SettingsMenu({
       {/*Audio Menu*/}
       {audiosArray.length > 0 &&
         <div
-          ref={audioRef}
+          ref={settingsAudioMenuRef}
           className={`settings-menu submenu${activeMenu === 'audio' ? ' active' : ''}`}
         >
           {submenuHeader("Audio")}
@@ -211,7 +260,7 @@ function SettingsMenu({
       {/*Captions Menu*/}
       {captionsArray.length > 0 &&
         <div
-          ref={captionsRef}
+          ref={settingsCaptionMenuRef}
           className={`settings-menu submenu${activeMenu === 'captions' ? ' active' : ''}`}
         >
           {submenuHeader("Captions")}
@@ -246,7 +295,7 @@ function SettingsMenu({
       {/*Quality Menu*/}
       {qualitiesArray.length > 0 &&
         <div
-          ref={qualityRef}
+          ref={settingsQualityMenuRef}
           className={`settings-menu submenu${activeMenu === "quality" ? " active" : ""}`}
         >
           {submenuHeader("Quality")}
@@ -289,7 +338,7 @@ function SettingsMenu({
       {/*Speed Menu*/}
       {playbackRatesArray.length > 0 &&
         <div
-          ref={speedRef}
+          ref={settingsPlaybackRateMenuRef}
           className={`settings-menu submenu${activeMenu === "speed" ? " active" : ""}`}
         >
           {submenuHeader("Speed")}

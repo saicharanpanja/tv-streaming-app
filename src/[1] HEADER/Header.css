@@ -10,9 +10,21 @@ header {
   padding: 0 20px;
   gap: 25px;
   z-index: 10;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+.header-logo {
+  cursor: pointer;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.header-logo:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+/*
 .search-wrapper {
   flex: 1;
   display: flex;
@@ -22,7 +34,6 @@ header {
   height: 38px;
   background-color: white;
   overflow: hidden;
-  display: none;
 }
 
 .search-input {
@@ -57,7 +68,6 @@ header {
   background-color: #eaeaea;
 }
 
-/*SIGN-IN*/
 .sign-in-wrapper {
   user-select: none;
   cursor: pointer;
@@ -90,3 +100,4 @@ header {
 .sign-in-icon {
   margin-left: -4px;
 }
+*/

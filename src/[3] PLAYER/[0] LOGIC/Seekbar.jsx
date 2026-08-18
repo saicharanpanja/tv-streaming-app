@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import Icon from "../[2] UTILS/Icon";
 
 export default function Seekbar({
   videoRef,
   currentSrc,
-  containerRef,
-  shouldIgnoreKeyPress
 }) {
   // Refs for DOM elements and state that doesn't trigger re-renders
   const isSeeking = useRef(false);
@@ -20,7 +17,6 @@ export default function Seekbar({
   const [progress, setProgress] = useState(0);
   const [isBuffering, setIsBuffering] = useState(false);
   const [bufferedProgress, setBufferedProgress] = useState(0);
-  const [overlayData, setOverlayData] = useState(null);
   const [hoverData, setHoverData] = useState(null);
 
   // Helper function to format seconds into MM:SS or HH:MM:SS
@@ -85,65 +81,6 @@ export default function Seekbar({
       cancelAnimationFrame(animationFrameId.current);
     };
   }, [videoRef, currentSrc]);
-
-  // Keydown effect
-  useEffect(() => {
-    const video = videoRef.current;
-    const container = containerRef.current;
-    if (!video || !container) return;
-
-    let timer;
-
-    //Helper function for seek and overlay.
-    const seekRelative = (seconds) => {
-      if (!video.duration) return;
-      video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration));
-      const iconName = seconds > 0 ? "forward-10" : "rewind-10";
-
-      setOverlayData({ name: iconName, id: Date.now() });
-      clearTimeout(timer);
-      timer = setTimeout(() => setOverlayData(null), 500);
-    };
-
-    const handleGlobalShortcuts = (event) => {
-      const { code, key } = event;
-
-      if (code === "ArrowRight" || code === "KeyL" || code === "ArrowLeft" || code === "KeyJ") {
-        if (shouldIgnoreKeyPress(event, { allowRepeat: true, allowRange: false })) return;
-        event.preventDefault();
-        (code === "ArrowRight" || code === "KeyL") ? seekRelative(10) : seekRelative(-10);
-        return;
-      }
-
-      const digit = parseInt(key, 10);
-      if (!isNaN(digit)) {
-        if (!video.duration || shouldIgnoreKeyPress(event)) return;
-        video.currentTime = (video.duration / 100) * (digit * 10);
-        setProgress(digit * 10);
-        return;
-      }
-    };
-
-    const handlePlayerShortcuts = (event) => {
-      if (shouldIgnoreKeyPress(event, { allowRepeat: true })) return;
-
-      if (event.key === 'Home' || event.key === 'End') {
-        event.preventDefault();
-        if (!video.duration || event.repeat) return;
-        const isHome = event.key === 'Home';
-        video.currentTime = isHome ? 0 : video.duration;
-        setProgress(isHome ? 0 : 100);
-      }
-    };
-
-    document.addEventListener("keydown", handleGlobalShortcuts);
-    container.addEventListener("keydown", handlePlayerShortcuts);
-    return () => {
-      document.removeEventListener("keydown", handleGlobalShortcuts);
-      container.removeEventListener("keydown", handlePlayerShortcuts);
-      clearTimeout(timer);
-    };
-  }, [videoRef, containerRef, currentSrc, shouldIgnoreKeyPress]);
 
   const handleMouseUp = () => {
     isSeeking.current = false;
@@ -251,17 +188,6 @@ export default function Seekbar({
         />
         <div className="progress-thumb" style={{ left: `${progress}%` }} />
       </div>
-
-      {overlayData &&
-        createPortal(
-          <div
-            key={overlayData.id}
-            className={`overlay-wrapper-${overlayData.name === "forward-10" ? "right" : "left"}`}
-          >
-            <Icon name={overlayData.name} size="3.5vw" color="rgba(255,255,255,0.8)" />
-          </div>,
-          document.querySelector(".player-container")
-        )}
     </div>
   );
 }

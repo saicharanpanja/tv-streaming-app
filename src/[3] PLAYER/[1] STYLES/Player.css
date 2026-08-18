@@ -1,20 +1,40 @@
+/*@media screen and (min-width: 751px) {
+  .player-container {
+    width: 100%;
+    border-radius: 12px;
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .player-container {
+    width: calc(100% + 20px);
+    border-radius: 0;
+    margin: -10px -10px auto -10px;
+  }
+}*/
+
 .player-container {
   display: block;
-  position: relative;
   width: 100%;
+  border-radius: 12px;
+  position: relative;
   max-width: 800px;
   max-height: 550px;
-  border-radius: 12px;
   overflow: hidden;
+  outline: none;
   background-color: black;
   aspect-ratio: 16 / 9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 
   /*captions fontsize and settingsmenu use these*/
   container-type: size;
-  container-name: video-player; 
+  container-name: video-player;
+  transition: all 0.2s ease-in-out;
 }
 
-.player-container.hide-cursor { cursor: none; }
+.player-container.hide-cursor {
+  cursor: none;
+}
 
 .video-wrapper {
   position: absolute;
@@ -27,15 +47,13 @@
 }
 
 /*CONTROLS CONTAINER*/
-.video-controls-container {
+.controls-container-desktop {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
 
   background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
 
   opacity: 1;
   visibility: visible;
@@ -44,18 +62,69 @@
   pointer-events: none;
 }
 
-.video-controls-container.hide {
+.player-container.mobile .controls-container-desktop {
+  display: none;
+}
+
+.controls-container-desktop.hide-controls {
   opacity: 0;
-  visibility: hidden;  
+  visibility: hidden;
   transform: translateY(2%);
 }
 
-.video-controls-container-bottom {
-  align-items: center;
-  justify-content: center;
+.controls-container-desktop .bottom {
   display: flex;
+  align-items: center;
   padding: 0px 15px 10px 15px;
   gap: 10px;
+}
+
+.controls-container-mobile {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  visibility: visible;
+  background: rgba(0, 0, 0, 0.7);
+  transition: all 0.2s ease-in-out;
+}
+
+.controls-container-mobile.hide-controls {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.player-container.desktop .controls-container-mobile {
+  display: none;
+}
+
+.controls-container-mobile .top {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 1.5cqw;
+  padding: 12px 15px 0 0;
+}
+
+.controls-container-mobile .middle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 10cqw;
+}
+
+.controls-container-mobile .bottom-one {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 0 15px 0 0;
+}
+
+.controls-container-mobile .bottom-two {
+  padding: 3px 0;
 }
 
 /*VIDEO CONTROLS ICONS SHOW*/
@@ -66,9 +135,34 @@
   transition: all 0.3s ease-in-out;
 }
 
+.controls-container-mobile .video-controls-icons {
+  height: clamp(25px, 6.5cqw, 50px);
+}
+
+.controls-container-mobile .middle .video-controls-icons {
+  padding: 7px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  height: clamp(13px, 9cqw, 45px);
+}
+
+.controls-container-mobile .middle .video-controls-icons.play,
+.controls-container-mobile .middle .video-controls-icons.pause {
+  height: clamp(17px, 11.5cqw, 60px);
+}
+
+.controls-container-desktop .video-controls-icons {
+  height: clamp(25px, 3.3cqw, 30px);
+}
+
 /*VIDEO CONTROLS ICONS HIDE*/
 .video-controls-icons.hide {
   opacity: 0;
+}
+
+/*VIDEO CONTROLS ICONS ROTATE*/
+.video-controls-icons.rotate {
+  transform: rotate(-60deg);
 }
 
 .video-controls-icons.pause,
@@ -193,7 +287,7 @@
 }
 
 /* Captions Styling */
-.video-captions-container {
+.captionstext-container {
   position: absolute;
   inset: auto 0 2%;
   text-align: center;
@@ -201,19 +295,23 @@
   transition: all 0.3s ease-in-out;
 }
 
-.player-container.controls-visible .video-captions-container {
+.player-container.controls-visible .captionstext-container {
   bottom: 60px;
 }
 
-.video-captions-container span {
+.player-container.mobile .captionstext-container {
+  bottom: 4%;
+}
+
+.captionstext-container span {
   display: inline;
-  line-height: 1.5; 
+  line-height: 1.5;
   white-space: pre-wrap;
   font-family: "Gordita-Medium", "Roboto", sans-serif;
-  font-size: clamp(14px, 2cqmin, 22px);
+  font-size: clamp(7px, 3.2cqmin, 30px);
 
   color: white;
-  padding: 1.8px 10px; 
+  padding: 1.8px 10px;
   border-radius: 4px;
   user-select: none;
   box-decoration-break: clone;

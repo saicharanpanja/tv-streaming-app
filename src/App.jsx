@@ -1,14 +1,14 @@
 import { Route, Routes } from 'react-router-dom'
 
-import ScrollToTop from './[6] UTILS/ScrollToTop'
-import TvPage from './[5] PAGES/TvPage'
+import TvPage from './[5] PAGES/TvPage';
+import useAutoScrollTop from './[6] UTILS/useAutoScrollTop';
 
-import './App.css'
+import './App.css';
 
 function App() {
+  useAutoScrollTop();
   return (
     <>
-      <ScrollToTop />
       <Routes>
         <Route index element={<TvPage />} />
         <Route path="/tv" element={<TvPage />} />
@@ -18,4 +18,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

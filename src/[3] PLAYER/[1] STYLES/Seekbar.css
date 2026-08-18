@@ -3,8 +3,6 @@
   padding: 0 12px;
   height: 20px;
   display: flex;
-  align-items: center;
-  cursor: pointer;
   pointer-events: auto;
 }
 
@@ -57,7 +55,6 @@
   width: 2px;
   height: 100%;
   z-index: 4;
-  pointer-events: none;
 }
 
 /* 5. Thumb */
@@ -68,7 +65,6 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  pointer-events: none;
   background-color: #fafafa;
   transform: translate(-50%, -50%) scale(0);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);

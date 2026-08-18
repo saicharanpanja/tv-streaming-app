@@ -1,67 +1,37 @@
-import { useEffect, useState, useCallback } from "react";
-import { createPortal } from "react-dom";
-import Icon from "../[2] UTILS/Icon";
+import useCaptionStorageSync from "../hooks/[0] Storage Sync/useCaptionStorageSync";
+import useCaptionProtocolSync from "../hooks/[1] Protocol Sync/useCaptionProtocolSync";
+import useCaptionsToggle from "../hooks/[6] Control Handlers/useCaptionsToggle";
 
-export default function Captions({ 
-  captionsLabel, 
-  setCaptionsLabel, 
+export default function Captions({
+  captionsLabel,
+  setCaptionsLabel,
   captionsArray,
-  shouldIgnoreKeyPress,
+  setCaptionsText,
+  videoRef,
+  shakaPlayerRef,
 }) {
-  const [overlayData, setOverlayData] = useState(null);
-  const areCaptionsOn = captionsLabel !== 'Disabled';
+  useCaptionStorageSync({ captionsLabel });
+  useCaptionProtocolSync({ captionsArray, captionsLabel, setCaptionsLabel, setCaptionsText, videoRef, shakaPlayerRef });
 
-  const toggleCaptions = useCallback(() => {
-    if (captionsArray.length < 1) return;
-
-    if (areCaptionsOn) {
-      setCaptionsLabel('Disabled');
-    } else {
-      const lastActive = localStorage.getItem("player:lastActiveCaption");
-      const firstAvailable = captionsArray[1] ? (
-        { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' }[captionsArray[1].language] || captionsArray[1].label
-      ) : 'Disabled';
-
-      setCaptionsLabel(lastActive || firstAvailable);
-    }
-  }, [areCaptionsOn, captionsArray, setCaptionsLabel]);
-
-  // Keydown effect for 'C' key.
-  useEffect(() => {
-    let timer;
-
-    const handleGlobalShortcuts = (event) => {
-      if (shouldIgnoreKeyPress(event)) return;
-      if (event.code === "KeyC") {
-        setOverlayData({ name: "captions", id: Date.now() });
-        clearTimeout(timer);
-        timer = setTimeout(() => setOverlayData(null), 500);
-        toggleCaptions();
-      }
-    };
-
-    document.addEventListener("keydown", handleGlobalShortcuts);
-    return () => {
-      document.removeEventListener("keydown", handleGlobalShortcuts);
-      clearTimeout(timer);
-    };
-  }, [shouldIgnoreKeyPress, toggleCaptions]);
+  const handleCaptionsToggle = useCaptionsToggle({ captionsArray, setCaptionsLabel });
 
   return (
-    <button className="video-controls captions-container" onClick={toggleCaptions}>
-      <Icon name="captions" />
-      <span className={`captions-underline${areCaptionsOn ? "" : " hide"}`} />
-      {overlayData &&
-        createPortal(
-          <div key={overlayData.id} className="overlay-wrapper">
-            <Icon
-              name={overlayData.name}
-              size="3.5vw"
-              color="rgba(255,255,255,0.8)"
-            />
-          </div>,
-          document.querySelector(".player-container")
-        )}
-    </button>
+    <>
+      {captionsArray.length > 1 &&
+        <button
+          className="video-controls captions-container"
+          aria-label="Captions (c)"
+          onClick={event => {
+            event.stopPropagation();
+            handleCaptionsToggle();
+          }}
+        >
+          <svg viewBox="0 -960 960 960" className="video-controls-icons">
+            <path d="M202.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-474.26q0-37.78 26.61-64.39t64.39-26.61h554.26q37.78 0 64.39 26.61t26.61 64.39v474.26q0 37.78-26.61 64.39t-64.39 26.61H202.87ZM288.37-360h109q19.15 0 32.33-13.17 13.17-13.18 13.17-32.33v-36.41h-63.59v20H306.7v-116.18h72.58v20h63.59v-36.41q0-19.15-13.17-32.33Q416.52-600 397.37-600h-109q-19.15 0-32.33 13.17-13.17 13.18-13.17 32.33v149q0 19.15 13.17 32.33Q269.22-360 288.37-360Zm274.26 0h109q19.15 0 32.33-13.17 13.17-13.18 13.17-32.33v-36.41H653.3v20h-72.58v-116.18h72.58v20h63.83v-36.41q0-19.15-13.17-32.33Q690.78-600 671.63-600h-109q-19.15 0-32.33 13.17-13.17 13.18-13.17 32.33v149q0 19.15 13.17 32.33Q543.48-360 562.63-360Z" />
+          </svg>
+          <span className={`captions-underline${captionsLabel == 'Disabled' ? " hide" : ""}`} />
+        </button>
+      }
+    </>
   );
 }

@@ -1,470 +1,263 @@
-import { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import { useState, useRef } from 'react';
+
+import { Seekbar } from '../components/Seekbar';
+import { SkipButton } from '../components/SkipButton';
+import { SettingsButton } from '../components/SettingsButton';
+
+import usePlaylist from "../hooks/usePlaylist";
+import useProtocol from "../hooks/useProtocol";
+import useControlHandlers from '../hooks/useControlHandlers';
 
 import SettingsMenu from "./SettingsMenu";
-import Seekbar from "./Seekbar";
-import SkipPrev from "./SkipPrev";
-import PlayPause from "./PlayPause";
-import SkipNext from "./SkipNext";
-import Volume from "./Volume";
-import Captions from "./Captions";
-import Settings from "./Settings";
-import Fullscreen from "./Fullscreen";
-import IconSprite from "../[2] UTILS/IconSprite";
 
 import "../[1] STYLES/Player.css";
 import "../[1] STYLES/Seekbar.css";
 import "../[1] STYLES/Volume.css";
 import "../[1] STYLES/Settings.css";
 import "../[1] STYLES/Fullscreen.css";
+import Fullscreen from './Fullscreen';
+import CaptionsText from '../components/CaptionsText';
+import Captions from './Captions';
+import useMobileDocumentSync from '../hooks/[3] Document Sync/useMobileDocumentSync';
+import VolumeControls from './VolumeControls';
+import PlaybackControls from './PlaybackControls';
+import TimeDisplay from '../components/TimeDisplay';
+import FeedbackOverlay from '../components/FeedbackOverlay';
+import IconSprite from '../[2] UTILS/IconSprite';
 
 function Player({
-  index = 0,
+  initialIndex = 0,
   postersArray = [],
   sourcesArray = [],
   onIndexChange = () => { }
 }) {
-
-  //DOM References
   const videoRef = useRef(null);
-  const hlsRef = useRef(null);
   const containerRef = useRef(null);
-  const hideControlsTimeout = useRef(null);
-  const isHoveringControlsRef = useRef(false);
 
-  // UI Visibility State
-  const [isPaused, setIsPaused] = useState(true);
-  const [controlsVisible, setControlsVisible] = useState(true);
   const [activeMenu, setActiveMenu] = useState(null);
-  const [playerSize, setPlayerSize] = useState({ width: 0, height: 0 });
+  const isMenuOpen = activeMenu !== null;
 
-  //Get current Source and Poster and check hasPrev, hasNext
-  const [currentIndex, setCurrentIndex] = useState(index);
-  const currentSrc = sourcesArray[currentIndex];
-  const currentPos = postersArray[currentIndex];
-  const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex < sourcesArray.length - 1;
-  useEffect(() => setCurrentIndex(index), [index]);
+  const [mobileControlsVisible, setMobileControlsVisible] = useState(true);
+  const [desktopControlsVisible, setDesktopControlsVisible] = useState(true);
 
-  // States for Captions, Qualities, Audio and playbackRate.
   const [captionsText, setCaptionsText] = useState("");
-  const [captionsArray, setCaptionsArray] = useState([]);
-  const [captionsLabel, setCaptionsLabel] = useState(() => localStorage.getItem("player:captions") || 'Disabled');
-
-  const [autoHeight, setAutoHeight] = useState(null);
-  const [qualitiesArray, setQualitiesArray] = useState([]);
-  const [qualityLabel, setQualityLabel] = useState(
-    () => (localStorage.getItem("player:quality") === "Auto"
-      ? "Auto"
-      : parseInt(localStorage.getItem("player:quality"), 10) || "Auto")
-  );
-
-  const [audiosArray, setAudiosArray] = useState([]);
-  const [audioLabel, setAudioLabel] = useState(() => localStorage.getItem("player:audio") || null);
-
-  const playbackRatesArray = [0.5, 0.75, 1, 1.25, 1.5];
-  const [playbackRate, setPlaybackRate] = useState(() => {
-    const n = parseFloat(localStorage.getItem("player:playbackRate"));
-    return !isNaN(n) ? n : 1;
+  const [captionsLabel, setCaptionsLabel] = useState(() => {
+    const savedCaption = localStorage.getItem("player:captions");
+    return savedCaption || 'Disabled'
   });
 
-  // Listen to core video events (play, pause, ended)
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const [qualityLabel, setQualityLabel] = useState(() => {
+    const savedQuality = localStorage.getItem("player:quality");
+    if (savedQuality === "Auto") return "Auto";
+    return parseInt(savedQuality, 10) || "Auto";
+  });
 
-    const handlePlay = () => setIsPaused(false);
-    const handlePause = () => setIsPaused(true);
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("ended", handlePause);
-    return () => {
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("ended", handlePause);
-    };
-  }, [currentSrc]);
+  /* ------------------------------------------------------------------------------------------------------ */
 
-  // Manage controls visibility when play/pause state changes
-  useEffect(() => {
-    clearTimeout(hideControlsTimeout.current);
-    isPaused ? setControlsVisible(true)
-      : hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000);
-  }, [isPaused]);
+  const PLAYLIST = usePlaylist({ initialIndex, sourcesArray, postersArray, onIndexChange });
 
-  // Listen to player size and update it
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  const CONTROLS_STATE_01 = useProtocol({ videoRef, currentSrc: PLAYLIST.currentSrc, setActiveMenu });
 
-    const handleResize = () => {
-      setPlayerSize({
-        width: container.offsetWidth,
-        height: container.offsetHeight,
-      });
-    };
+  const CONTROLS_HANDLERS = useControlHandlers({ setCurrentIndex: PLAYLIST.setCurrentIndex });
 
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
+  const { isMobileDevice } = useMobileDocumentSync();
 
-  // HLS Setup, Get quality heights, subtitles, audio tracks and teardown.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !currentSrc) return;
-
-    setCaptionsArray([]);
-    setQualitiesArray([]);
-    setAudiosArray([]);
-
-    // Get the available subtitles by filtering.
-    const getCaptions = () => {
-      const uniqueCaptions = Array.from(video.textTracks).filter(
-        (t) => t.kind === "subtitles" || t.kind === "captions"
-      );
-
-      uniqueCaptions.length > 0
-        ? setCaptionsArray([
-          { language: "disabled", label: "Disabled", mode: "disabled" },
-          ...uniqueCaptions])
-        : setActiveMenu(prev => prev === "captions" ? null : prev);
-    }
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hlsRef.current = hls;
-
-      // Get the available quality levels.
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        const map = new Map();
-        hls.levels.forEach((level, index) => {
-          const previous = map.get(level.height);
-          // Get the best bitrate of same heights if any.
-          if (!previous || level.bitrate > previous.bitrate) {
-            map.set(level.height, { levelIndex: index, bitrate: level.bitrate });
-          }
-        });
-
-        // Convert to new array without bitrates.
-        const uniqueHeights = Array.from(map.entries())
-          .map(([height, obj]) => ({ height, levelIndex: obj.levelIndex }))
-          .sort((a, b) => b.height - a.height);
-
-        uniqueHeights.length > 0
-          ? setQualitiesArray([
-            ...uniqueHeights,
-            { height: "Auto", levelIndex: -1 }])
-          : setActiveMenu(prev => prev === "quality" ? null : prev);
-      });
-
-      // Get the available audio levels.
-      // Close the open audio menu if no audio levels.
-      let isAudioEventFired = false;
-      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, { audioTracks }) => {
-        isAudioEventFired = true;
-        setAudiosArray(audioTracks);
-      });
-
-      hls.on(Hls.Events.LEVEL_LOADED, () => {
-        if (isAudioEventFired) return;
-        isAudioEventFired = true;
-        hls.audioTracks.length < 1 && setActiveMenu(
-          prev => prev === "audio" ? null : prev
-        );
-      });
-
-      // Set the AutoHeight if quality changes.
-      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
-        const level = hls.levels?.[data.level];
-        if (level?.height) setAutoHeight(level.height);
-      });
-
-      hls.loadSource(currentSrc);
-      hls.attachMedia(video);
-      video.play().catch(() => { });
-      video.addEventListener('loadedmetadata', getCaptions);
-      return () => {
-        hls.destroy();
-        hlsRef.current = null;
-        video.removeEventListener('loadedmetadata', getCaptions);
-      };
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = currentSrc;
-      video.play().catch(() => { });
-      video.addEventListener('loadedmetadata', getCaptions);
-      return () => {
-        video.removeEventListener('loadedmetadata', getCaptions);
-      };
-    }
-  }, [currentSrc]);
-
-  // Apply the saved captions whenever changes.
-  useEffect(() => {
-    if (captionsArray.length > 0) {
-      const getConsistentLabel = track => {
-        const langMap = { de: 'Deutsch', deu: 'Deutsch', ger: 'Deutsch' };
-        return langMap[track.language] || track.label;
-      };
-
-      let trackFound = null;
-      captionsArray.forEach(track => {
-        if (captionsLabel !== "Disabled" && getConsistentLabel(track) === captionsLabel) {
-          track.mode = 'hidden';
-          trackFound = track;
-        } else {
-          track.mode = 'disabled';
-        }
-      });
-
-      if (trackFound) {
-        const handleCueChange = () => {
-          const text = trackFound.activeCues?.[0]?.text || '';
-          setCaptionsText(text.replace(/<[^>]+>/g, ''));
-        }
-
-        handleCueChange();
-        trackFound.addEventListener('cuechange', handleCueChange);
-        return () => {
-          trackFound.removeEventListener('cuechange', handleCueChange);
-        };
-      } else setCaptionsText('');
-
-      if (!trackFound && captionsLabel !== 'Disabled') {
-        setCaptionsLabel(getConsistentLabel(captionsArray[1]));
-      }
-    } else setCaptionsText('');
-  }, [captionsArray, captionsLabel]);
-
-  // Apply the saved quality whenever changes.
-  useEffect(() => {
-    const hls = hlsRef.current;
-    if (!hls || qualitiesArray.length < 1) return;
-
-    const match = qualitiesArray.find(q => q.height === qualityLabel);
-
-    if (match) {
-      hls.currentLevel !== match.levelIndex && (hls.currentLevel = match.levelIndex);
-    } else {
-      hls.currentLevel !== -1 && (hls.currentLevel = -1);
-      qualityLabel !== "Auto" && (setQualityLabel("Auto"));
-    }
-  }, [qualitiesArray, qualityLabel]);
-
-  // Apply the saved audio whenever changes.
-  useEffect(() => {
-    const hls = hlsRef.current;
-    if (!hls || audiosArray.length < 1) return;
-
-    const match = audiosArray.find(t => t.name === audioLabel);
-
-    if (audioLabel && match) {
-      hls.audioTrack !== match.id && (hls.audioTrack = match.id);
-    } else {
-      hls.audioTrack = -1;
-      setAudioLabel(audiosArray[hls.audioTrack].name);
-    }
-  }, [audiosArray, audioLabel]);
-
-  // Apply the saved playbackRate whenever changes.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.playbackRate = playbackRate;
-    if ("preservesPitch" in video) {
-      video.preservesPitch = true;
-    } else if ("mozPreservesPitch" in video) {
-      video.mozPreservesPitch = true;
-    }
-  }, [currentSrc, playbackRate]);
-
-  // Save the captionsLabel whenever changes.
-  useEffect(() => {
-    try {
-      localStorage.setItem("player:captions", captionsLabel);
-      if (captionsLabel !== 'Disabled') {
-        localStorage.setItem("player:lastActiveCaption", captionsLabel);
-      }
-    } catch (err) {
-      console.error("[Player] Could not save caption state:", err);
-    }
-  }, [captionsLabel]);
-
-  // Save the qualityLabel whenever changes.
-  useEffect(() => {
-    try {
-      localStorage.setItem("player:quality", qualityLabel.toString());
-    } catch (err) {
-      console.error("[Player] Could not save quality:", err);
-    }
-  }, [qualityLabel]);
-
-  // Save the audioLabel whenever it changes.
-  useEffect(() => {
-    try {
-      localStorage.setItem("player:audio", audioLabel);
-    } catch (err) {
-      console.error("[Player] Could not save audio state:", err);
-    }
-  }, [audioLabel]);
-
-  // Save the playbackRate whenever changes.
-  useEffect(() => {
-    try {
-      localStorage.setItem("player:playbackRate", playbackRate.toString());
-    } catch (err) {
-      console.error("[Player] Could not save playback rate:", err);
-    }
-  }, [playbackRate]);
-
-  const handlePrev = () => {
-    if (hasPrev) {
-      const newIndex = currentIndex - 1;
-      setCurrentIndex(newIndex);
-      onIndexChange(newIndex);
-    }
-  };
-
-  const handleNext = () => {
-    if (hasNext) {
-      const newIndex = currentIndex + 1;
-      setCurrentIndex(newIndex);
-      onIndexChange(newIndex);
-    }
-  };
-
-  //Gatekeeper for Keydown Effects.
-  const shouldIgnoreKeyPress = (event, options = {}) => {
-    const { allowRange = true, allowRepeat = false, allowShift = false } = options;
-    const { target, ctrlKey, altKey, metaKey, shiftKey, repeat } = event;
-    if (ctrlKey || altKey || metaKey) return true;
-    if (!allowShift && shiftKey) return true;
-    if (target.tagName === 'INPUT') return !(allowRange && target.type === 'range');
-    if (target.tagName === 'TEXTAREA' || target.isContentEditable) return true;
-    if (repeat && !allowRepeat) return true;
-    return false;
-  };
+  /* ---------------------------------------------------------------------------------------------------------- */
 
   return (
     <div
+      tabIndex="-1" //So that the player keyboard controls work
       ref={containerRef}
-      tabIndex="-1"
-      style={{ outline: 'none' }}
-      className={`player-container${controlsVisible || activeMenu ? " controls-visible" : " hide-cursor"}`}
-      onMouseLeave={() => !isPaused && (clearTimeout(hideControlsTimeout.current), setControlsVisible(false))}
-      onMouseMove={() => {
-        if (isPaused) return;
-        clearTimeout(hideControlsTimeout.current);
-        setControlsVisible(true);
-        !isHoveringControlsRef.current && (hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000))
-      }}
+      className={
+        `player-container
+        ${desktopControlsVisible || isMenuOpen ? " controls-visible" : " hide-cursor"}
+        ${isMobileDevice ? " mobile" : " desktop"}`
+      }
     >
       <IconSprite />
 
       <video
-        key={currentSrc}
+        key={PLAYLIST.currentIndex}
         ref={videoRef}
         crossOrigin="anonymous"
         className="video-wrapper"
-        poster={currentPos}
+        poster={PLAYLIST.currentPos}
         preload="metadata"
+        playsInline={true}
       />
 
-      {(captionsText && captionsLabel !== "Disabled") &&
-        <div className="video-captions-container">
-          <span>{captionsText}</span>
-        </div>
-      }
-
-      <SettingsMenu
-        playerSize={playerSize}
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-
-        audiosArray={audiosArray}
-        captionsArray={captionsArray}
-        qualitiesArray={qualitiesArray}
-        playbackRatesArray={playbackRatesArray}
-
-        autoHeight={autoHeight}
-        audioLabel={audioLabel}
+      <CaptionsText
         captionsLabel={captionsLabel}
-        qualityLabel={qualityLabel}
-        playbackRate={playbackRate}
+        captionsText={captionsText}
+      />
 
-        setAudioLabel={setAudioLabel}
+      <FeedbackOverlay
+        videoRef={videoRef}
+        containerRef={containerRef}
+        setCurrentIndex={PLAYLIST.setCurrentIndex}
+        captionsArray={CONTROLS_STATE_01.captionsArray}
         setCaptionsLabel={setCaptionsLabel}
-        setQualityLabel={setQualityLabel}
-        setPlaybackRate={setPlaybackRate}
+
+        isMenuOpen={isMenuOpen}
+        setActiveMenu={setActiveMenu}
+        currentIndex={PLAYLIST.currentIndex}
+        isMobile={isMobileDevice}
+        setMobileControlsVisible={setMobileControlsVisible}
       />
 
       <div
-        className={`video-controls-container${controlsVisible || activeMenu ? "" : " hide"}`}
-        onMouseEnter={() => isHoveringControlsRef.current = true}
-        onMouseLeave={() => isHoveringControlsRef.current = false}
+        className={`controls-container-mobile${mobileControlsVisible ? "" : " hide-controls"}`}
+        onClick={() => isMenuOpen ? setActiveMenu(null) : setMobileControlsVisible(false)}
       >
-        <Seekbar
-          videoRef={videoRef}
-          currentSrc={currentSrc}
-          containerRef={containerRef}
-          shouldIgnoreKeyPress={shouldIgnoreKeyPress}
-        />
-
-        <div className="video-controls-container-bottom">
-          {sourcesArray.length > 1 &&
-            <SkipPrev
-              onPrev={handlePrev}
-              isDisabled={!hasPrev}
-              shouldIgnoreKeyPress={shouldIgnoreKeyPress}
-            />
-          }
-
-          <PlayPause
-            videoRef={videoRef}
-            currentSrc={currentSrc}
-            shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+        <div className="top">
+          <Captions
+            captionsLabel={captionsLabel}
+            setCaptionsLabel={setCaptionsLabel}
+            captionsArray={CONTROLS_STATE_01.captionsArray}
+            setCaptionsText={setCaptionsText}
           />
 
-          {sourcesArray.length > 1 &&
-            <SkipNext
-              onNext={handleNext}
-              isDisabled={!hasNext}
-              shouldIgnoreKeyPress={shouldIgnoreKeyPress}
-            />
-          }
-
-          <Volume
-            videoRef={videoRef}
-            currentSrc={currentSrc}
-            containerRef={containerRef}
-            shouldIgnoreKeyPress={shouldIgnoreKeyPress}
-          />
-
-          <div className="spacer"></div>
-
-          {captionsArray.length > 0 &&
-            <Captions
-              captionsLabel={captionsLabel}
-              setCaptionsLabel={setCaptionsLabel}
-              captionsArray={captionsArray}
-              shouldIgnoreKeyPress={shouldIgnoreKeyPress}
-            />
-          }
-
-          <Settings
-            activeMenu={activeMenu}
-            setActiveMenu={setActiveMenu}
-            autoHeight={autoHeight}
+          <SettingsButton
+            shouldRotate={isMenuOpen}
+            autoHeight={CONTROLS_STATE_01.autoHeight}
             qualityLabel={qualityLabel}
+            setActiveMenu={setActiveMenu}
+          />
+        </div>
+
+        <div className="middle">
+          <SkipButton
+            direction="previous"
+            isDisabled={!PLAYLIST.hasPrev}
+            isRendered={PLAYLIST.isPlaylist}
+            onClick={(e) => {
+              e.stopPropagation();
+              CONTROLS_HANDLERS.handleSkipPrev();
+            }}
+          />
+
+          <PlaybackControls
+            videoRef={videoRef}
+            currentIndex={PLAYLIST.currentIndex}
+          />
+
+          <SkipButton
+            direction="next"
+            isDisabled={!PLAYLIST.hasNext}
+            isRendered={PLAYLIST.isPlaylist}
+            onClick={(e) => {
+              e.stopPropagation();
+              CONTROLS_HANDLERS.handleSkipNext();
+            }}
+          />
+        </div>
+
+        <div className="bottom-one">
+          <Fullscreen
+            containerRef={containerRef}
+            videoRef={videoRef}
+          />
+        </div>
+
+        <div className="bottom-two">
+          <Seekbar
+            videoRef={videoRef}
+            currentIndex={PLAYLIST.currentIndex}
+            onSeekStart={CONTROLS_HANDLERS.handleSeekStart}
+            onSeekEnd={CONTROLS_HANDLERS.handleSeekEnd}
+            onSeek={CONTROLS_HANDLERS.handleSeek}
+          />
+        </div>
+      </div>
+
+      <div
+        className={`controls-container-desktop${desktopControlsVisible || isMenuOpen ? "" : " hide-controls"}`}
+      >
+        <div className="top">
+          <Seekbar
+            videoRef={videoRef}
+            currentIndex={PLAYLIST.currentIndex}
+            onSeekStart={CONTROLS_HANDLERS.handleSeekStart}
+            onSeekEnd={CONTROLS_HANDLERS.handleSeekEnd}
+            onSeek={CONTROLS_HANDLERS.handleSeek}
+          />
+        </div>
+
+        <div className="bottom">
+          <SkipButton
+            direction="previous"
+            onClick={CONTROLS_HANDLERS.handleSkipPrev}
+            isDisabled={!PLAYLIST.hasPrev}
+            isRendered={PLAYLIST.isPlaylist}
+          />
+
+          <PlaybackControls
+            videoRef={videoRef}
+            currentIndex={PLAYLIST.currentIndex}
+          />
+
+          <SkipButton
+            direction="next"
+            onClick={CONTROLS_HANDLERS.handleSkipNext}
+            isDisabled={!PLAYLIST.hasNext}
+            isRendered={PLAYLIST.isPlaylist}
+          />
+
+          <VolumeControls
+            videoRef={videoRef}
+            currentIndex={PLAYLIST.currentIndex}
+          />
+
+          <TimeDisplay
+            videoRef={videoRef}
+            currentIndex={PLAYLIST.currentIndex}
+          />
+
+          <div className="spacer" />
+
+          <Captions
+            captionsLabel={captionsLabel}
+            setCaptionsLabel={setCaptionsLabel}
+            captionsArray={CONTROLS_STATE_01.captionsArray}
+            setCaptionsText={setCaptionsText}
+          />
+
+          <SettingsButton
+            shouldRotate={isMenuOpen}
+            autoHeight={CONTROLS_STATE_01.autoHeight}
+            qualityLabel={qualityLabel}
+            setActiveMenu={setActiveMenu}
           />
 
           <Fullscreen
             containerRef={containerRef}
-            shouldIgnoreKeyPress={shouldIgnoreKeyPress}
+            videoRef={videoRef}
           />
         </div>
       </div>
+
+      <SettingsMenu
+        videoRef={videoRef}
+        protocolRef={CONTROLS_STATE_01.protocolRef}
+        currentIndex={PLAYLIST.currentIndex}
+
+        isMobile={isMobileDevice}
+        isMenuOpen={isMenuOpen}
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+
+        autoHeight={CONTROLS_STATE_01.autoHeight}
+        audiosArray={CONTROLS_STATE_01.audiosArray}
+        captionsArray={CONTROLS_STATE_01.captionsArray}
+        qualitiesArray={CONTROLS_STATE_01.qualitiesArray}
+        playbackRatesArray={CONTROLS_STATE_01.playbackRatesArray}
+
+        captionsLabel={captionsLabel}
+        qualityLabel={qualityLabel}
+
+        setCaptionsLabel={setCaptionsLabel}
+        setQualityLabel={setQualityLabel}
+      />
     </div>
   );
 }

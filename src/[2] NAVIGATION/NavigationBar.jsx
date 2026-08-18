@@ -8,12 +8,12 @@ import {
 } from "@phosphor-icons/react";
 import "./NavigationBar.css";
 
-function NavigationBar({channel}) {
+function NavigationBar({ channel }) {
   const [clickedIcon, setClickedIcon] = useState(null);
 
   function navClickEffect(page) {
     setClickedIcon(page);
-    setTimeout(()=>setClickedIcon(null), 200);
+    setTimeout(() => setClickedIcon(null), 200);
   }
 
   return (
@@ -26,7 +26,7 @@ function NavigationBar({channel}) {
       >
         {({ isActive }) =>
           <TelevisionIcon
-            className={`nav-icon${clickedIcon==="tv" ? " clicked" : ""}`}
+            className={`nav-icon${clickedIcon === "tv" ? " clicked" : ""}`}
             weight={isActive ? "fill" : "light"}
             color={isActive ? "#1A2421" : "black"}
             size={29}

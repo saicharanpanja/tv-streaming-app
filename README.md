@@ -1,12 +1,27 @@
-# React + Vite
+# 📺 TV Streaming App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)
+**Live App Link:** [stream.sprachglanz.com](https://stream.sprachglanz.com)
 
-Currently, two official plugins are available:
+A responsive web application for streaming public television channels. This project was developed to provide a simple, fast, and user-friendly interface for regional TV channels.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📸 Screenshots
+![Working Demo](Animation.gif)
+![Player](image-6.png)
+![Player with settings menu open](image-4.png)
+![Player in a webpage](image-10.png)
 
-## Expanding the ESLint configuration
+## ✨ Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* **Live Streaming:** Direct integration of HLS streams (HTTP Live Streaming).
+* **Custom Video Player:** Custom player controls for volume, quality, and subtitles.
+* **Responsive Design:** Desktop and mobile-friendly.
+* **Channel Selection:** Clear grid layout for quick navigation between channels.
+
+## 🚀 Local Installation
+
+If you want to run the project locally:
+
+1. Clone the repository: `git clone https://github.com/saicharanpanja/tv-streaming-app.git`
+2. Install dependencies: `npm install`
+3. Start the development server: `npm start` (or `npm run dev`)
