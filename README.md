@@ -1,27 +1,60 @@
-# 📺 TV Streaming App
+A responsive web application for streaming public TV channels via HLS. The application provides a custom video player, channel selection, subtitles, playback controls and detailed channel information.
 
-![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)
-**Live App Link:** [stream.sprachglanz.com](https://stream.sprachglanz.com)
+[Checkout the demo](https://stream.sprachglanz.com)
 
-A responsive web application for streaming public television channels. This project was developed to provide a simple, fast, and user-friendly interface for regional TV channels.
+<a href="https://stream.sprachglanz.com/tv/one"><img src="public/demo.png" alt="responsive layout"></a>
 
-## 📸 Screenshots
-![Working Demo](Animation.gif)
-![Player](image-6.png)
-![Player with settings menu open](image-4.png)
-![Player in a webpage](image-10.png)
+<a href="https://stream.sprachglanz.com/tv/mdr"><img src="public/animation.gif" width="100%" alt="tv streaming demo"></a>
 
-## ✨ Features
+## Features
 
-* **Live Streaming:** Direct integration of HLS streams (HTTP Live Streaming).
-* **Custom Video Player:** Custom player controls for volume, quality, and subtitles.
-* **Responsive Design:** Desktop and mobile-friendly.
-* **Channel Selection:** Clear grid layout for quick navigation between channels.
+- 📡 **Live streaming** - playback of TV channels using HLS
+- 🎬 **Clean video player** - customized for a better user experience
+- ⌨️ **Shortcuts** - supports keyboard shortcuts
+- ⚙️ **Playback controls** - adjust volume, speed, quality on the fly
+- 📖 **Multiple captions** - support for multiple caption tracks
+- 🔎 **Fullscreen** - supports native fullscreen
+- 📱 **Responsive** - works with any screen size
+- 🎨 **Dynamic theming** - UI colors adapt dynamically to each TV channel
+- 📺 **Channel selection** - grid-based navigation between available TV channels
+- ℹ️ **Channel information** - detailed information about the currently selected channel
+- 🧩 **Single-Page Application** – seamless navigation without page reloads
 
-## 🚀 Local Installation
+## Technologies
 
-If you want to run the project locally:
+* **React** - user interface and component-based application structure
+* **JavaScript** - logic and interactions
+* **HTML5** - video playback and semantic structure
+* **CSS3** - styling and responsive layout
+* **HLS** - http live streaming
+* **Vite** - development environment and build tooling
+* **Git & GitHub** - version control and project management
+
+## Quick setup
+
+Before proceeding make sure you have Node.js and npm installed.
 
 1. Clone the repository: `git clone https://github.com/saicharanpanja/tv-streaming-app.git`
 2. Install dependencies: `npm install`
-3. Start the development server: `npm start` (or `npm run dev`)
+3. Start the development server: `npm run dev`
+
+## Shortcuts
+
+| Key             | Action                                       |
+| --------------- | -------------------------------------------- |
+| `space` , `k`   | Toggle playback                              |
+| `c`             | Toggle captions                              |
+| `f`             | Toggle fullscreen                            |
+| `m`             | Toggle mute                                  |
+| &uarr;          | Increase volume by 10%                       |
+| &darr;          | Decrease volume by 10%                       |
+| &larr; , `j`    | Seek backward 10 seconds                     |
+| &rarr; , `l`    | Seek forward 10 seconds                      |
+| `Home`/`End`    | Seek to beginning/last seconds               |
+| `0` to `9`      | Seek to 0% to 90%                            |
+| `Shift + N`     | Move to the next channel                     |
+| `Shift + P`     | Move to the previous channel                 |
+
+## About the Project
+
+This project is a React-based TV streaming application focused on HLS video playback, interactive player controls and responsive channel navigation. The main goal was to build a clean and intuitive streaming interface while exploring HLS integration and interactive web development.
